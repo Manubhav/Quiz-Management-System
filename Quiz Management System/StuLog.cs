@@ -1,12 +1,10 @@
-﻿using Microsoft.Office.Interop.Excel;
+﻿using FirebaseAdmin;
+using FirebaseAdmin.Auth;
+using Firebase.Database;
+using Firebase.Database.Query;
+using Google.Apis.Auth.OAuth2;
 using System;
-using System.Collections.Generic;
-using System.ComponentModel;
-using System.Data;
-using System.Data.SqlClient;
-using System.Drawing;
 using System.Linq;
-using System.Text;
 using System.Threading.Tasks;
 using System.Windows.Forms;
 
@@ -14,98 +12,71 @@ namespace Quiz_Management_System
 {
     public partial class StuLog : Form
     {
-        static SqlConnection con = new SqlConnection(@"Data Source=DESKTOP-M42063Q;Initial Catalog=Quiz_Management_System;Integrated Security=True");
-        static SqlCommand scmd;
+        private static FirebaseClient firebaseClient;
+
         public StuLog()
         {
             InitializeComponent();
+
+            // Initialize Firebase
+            FirebaseApp.Create(new AppOptions()
+            {
+                Credential = GoogleCredential.FromFile("F:\\UTS\\Sem-IV\\.NET App Dev\\Quiz_Management_System-master\\Quiz Management System\\smart-learning-system-a2c86-firebase-adminsdk-265q7-82bc2c0986.json"),
+            });
+
+            firebaseClient = new FirebaseClient("https://smart-learning-system-a2c86-default-rtdb.asia-southeast1.firebasedatabase.app");
         }
 
-        private void button1_Click(object sender, EventArgs e)
+        private async void button1_Click(object sender, EventArgs e)
         {
             Properties.Settings.Default.studentEmail = EmailLog.Text;
             Properties.Settings.Default.Save();
-            bool isEmailok = false, isPassok = false;
+
             if (!Authenticate())
             {
                 MessageBox.Show("Don't keep any textbox blank!");
                 return;
             }
 
-            string query = "SELECT * FROM Students WHERE Email=@Email";
-            con.Open();
-            scmd = new SqlCommand(query, con);
+            // Check if the user exists
+            var students = await firebaseClient
+                .Child("Students")
+                .OrderByKey()
+                .OnceAsync<Student>();
 
-            //add parameters
+            var student = students.FirstOrDefault(s => s.Object.Email == EmailLog.Text);
 
-            scmd.Parameters.Add("@Email", SqlDbType.NVarChar);
-            scmd.Parameters["@Email"].Value = EmailLog.Text;
-
-
-            SqlDataReader sda = scmd.ExecuteReader();
-
-            if (sda.HasRows)
-            {
-                isEmailok = true;
-            }
-            con.Close();
-
-            con.Open();
-            query = "SELECT * FROM Students WHERE Email=@Email AND Password=@Password";
-            scmd = new SqlCommand(query, con);
-
-            //add parameters
-
-            scmd.Parameters.Add("@Email", SqlDbType.NVarChar);
-            scmd.Parameters["@Email"].Value = EmailLog.Text;
-
-            scmd.Parameters.Add("@Password", SqlDbType.NVarChar);
-            scmd.Parameters["@Password"].Value = PassLog.Text;
-
-
-            sda = scmd.ExecuteReader();
-
-            if (sda.HasRows)
-            {
-                isPassok = true;
-            }
-
-            if (isEmailok == false)
+            if (student == null)
             {
                 MessageBox.Show("User does not exist!");
+                return;
             }
-            else if (isEmailok == true && isPassok == false)
-            {
-                MessageBox.Show("Something went wrong!");
-            }
-            else
-            {
-                //uQuiz uQuiz = new uQuiz();
-                //uQuiz.stuName = EmailLog.Text;
-                Hide();
-                StuForm StuApp = new StuForm();
-                StuApp.ShowDialog();
-              
-                Close();
-            }
-            con.Close();
-        }
 
+            if (student.Object.Password != PassLog.Text)
+            {
+                MessageBox.Show("Invalid password!");
+                return;
+            }
+
+            // Proceed to next form
+            Hide();
+            StuForm StuApp = new StuForm();
+            StuApp.ShowDialog();
+            Close();
+        }
 
         bool Authenticate()
         {
-            if (string.IsNullOrWhiteSpace(EmailLog.Text) ||
-                string.IsNullOrWhiteSpace(PassLog.Text)
-                )
-
+            if (string.IsNullOrWhiteSpace(EmailLog.Text) || string.IsNullOrWhiteSpace(PassLog.Text))
                 return false;
-            else return true;
 
+            return true;
         }
+    }
 
-       
-       
-        
-        
+    public class Student
+    {
+        public string Email { get; set; }
+        public string Password { get; set; }
     }
 }

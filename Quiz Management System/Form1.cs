@@ -17,7 +17,12 @@ namespace Quiz_Management_System
         {
             StuLog stulog = new StuLog();
             stulog.ShowDialog();
-            
+
+        }
+
+        private void Form1_Load(object sender, EventArgs e)
+        {
+
         }
     }
 }
