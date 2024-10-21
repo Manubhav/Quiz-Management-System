@@ -79,9 +79,14 @@ namespace Quiz_Management_System
                         Data = Convert.ToBase64String(buffer),
                         Extension = extn,
                         FileName = name,
-                        Subject_id = subLec.Text
+                        Subject_name = SafeSubjectName(subLec.Text)
                     });
             }
+        }
+
+        private string SafeSubjectName(string subjectName)
+        {
+            return subjectName.Replace(".", "dot").Replace("+", "plus");
         }
 
         // Load subjects and lectures from Firebase on form load

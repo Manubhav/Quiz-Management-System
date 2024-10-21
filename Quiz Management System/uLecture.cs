@@ -19,6 +19,16 @@ namespace Quiz_Management_System
 
         private async Task LoadData()
         {
+            // Load all subjects from Firebase and cache them in a dictionary
+            var subjects = await firebaseClient
+                .Child("Subjects")
+                .OnceAsync<Subject>();
+
+            // Create a dictionary to store subject data for quick lookup
+            var subjectDictionary = subjects.ToDictionary(
+                subject => subject.Key,
+                subject => subject.Object.Name);
+
             // Load lecture data from Firebase
             var lectures = await firebaseClient
                 .Child("Lectures")
@@ -30,23 +40,31 @@ namespace Quiz_Management_System
             dataTable.Columns.Add("Extension");
             dataTable.Columns.Add("Subject");
 
+            // Process lectures and match subjects using the dictionary
             foreach (var lecture in lectures)
             {
-                // Fetch the subject using the Subject_id stored in the lecture
-                var subject = await firebaseClient
-                    .Child("Subjects")
-                    .OrderByKey()
-                    .EqualTo(lecture.Object.Subject_id)
-                    .OnceSingleAsync<Subject>();
+                // Try to find the subject in the dictionary using the Subject_name
+                string subjectName = lecture.Object.Subject_name;
+                string subjectValue = "Unknown"; // Default if the subject is not found
 
-                // Check if subject is found
-                string subjectName = subject?.Name ?? "Unknown"; // Default to "Unknown" if subject is null
+                // Manually search for the value in the dictionary
+                foreach (var kvp in subjectDictionary)
+                {
+                    if (kvp.Value.Equals(subjectName, StringComparison.OrdinalIgnoreCase))
+                    {
+                        subjectValue = kvp.Value; // Found a match
+                        break;
+                    }
+                }
 
+                // Add the lecture data to the data table
                 dataTable.Rows.Add(lecture.Key, lecture.Object.FileName, lecture.Object.Extension, subjectName);
             }
 
+            // Bind the data to the DataGridView
             dataGridView1.DataSource = dataTable;
         }
+
 
 
         private async Task ComboLoad()
@@ -64,23 +82,44 @@ namespace Quiz_Management_System
 
         private async Task FilterCombo()
         {
+            // Load all subjects from Firebase and cache them in a dictionary
+            var subjects = await firebaseClient
+                .Child("Subjects")
+                .OnceAsync<Subject>();
+
+            // Create a dictionary to store subject data for quick lookup
+            var subjectDictionary = subjects.ToDictionary(
+                subject => subject.Key,
+                subject => subject.Object.Name);
+
+            // Load all lectures from Firebase
             var filteredLectures = await firebaseClient
                 .Child("Lectures")
                 .OnceAsync<Lecture>();
 
-            var filteredData = new List<Lecture>();
+            var filteredData = new List<(FirebaseObject<Lecture> Lecture, string SubjectName)>();
+
+            // Process each lecture
             foreach (var lecture in filteredLectures)
             {
-                // Get the subject based on Subject_id from Lecture
-                var subject = await firebaseClient
-                    .Child("Subjects")
-                    .Child(lecture.Object.Subject_id)
-                    .OnceSingleAsync<Subject>();
+                // Try to find the subject in the dictionary using the Subject_name
+                string subjectName = lecture.Object.Subject_name;
+                string subjectValue = "Unknown"; // Default if the subject is not found
 
-                // Check if subject is found
-                if (subject != null && subject.Name.Contains(comboBox1.Text, StringComparison.OrdinalIgnoreCase))
+                // Manually search for the value in the dictionary
+                foreach (var kvp in subjectDictionary)
                 {
-                    filteredData.Add(lecture.Object);
+                    if (kvp.Value.Equals(subjectName, StringComparison.OrdinalIgnoreCase))
+                    {
+                        subjectValue = kvp.Value; // Found a match
+                        break;
+                    }
+                }
+                // Check if the subject matches the filter criteria
+                if (subjectValue.Contains(comboBox1.Text, StringComparison.OrdinalIgnoreCase))
+                {
+                    // Store both the lecture and the subject name to avoid fetching the subject again
+                    filteredData.Add((lecture, subjectValue));
                 }
             }
 
@@ -90,17 +129,10 @@ namespace Quiz_Management_System
             dataTable.Columns.Add("Extension");
             dataTable.Columns.Add("Subject");
 
-            foreach (var lecture in filteredData)
+            // Populate the data table with filtered data
+            foreach (var item in filteredData)
             {
-                var subject = await firebaseClient
-                    .Child("Subjects")
-                    .Child(lecture.Subject_id) 
-                    .OnceSingleAsync<Subject>();
-
-                // Check if subject is found
-                string subjectName = subject?.Name ?? "Unknown"; // Default to "Unknown" if subject is null
-
-                dataTable.Rows.Add(lecture.Key, lecture.Object.FileName, lecture.Object.Extension, subjectName);
+                dataTable.Rows.Add(item.Lecture.Key, item.Lecture.Object.FileName, item.Lecture.Object.Extension, item.SubjectName);
             }
 
             dataGridView1.DataSource = dataTable;
@@ -122,7 +154,7 @@ namespace Quiz_Management_System
         {
             // Fetch the lecture data from Firebase
             var lecture = await firebaseClient
-                .Child("Lecture")
+                .Child("Lectures")
                 .Child(id)
                 .OnceSingleAsync<Lecture>();
 

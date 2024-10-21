@@ -157,7 +157,7 @@
             this.label5.Name = "label5";
             this.label5.Size = new System.Drawing.Size(71, 21);
             this.label5.TabIndex = 13;
-            this.label5.Text = "Subject ID";
+            this.label5.Text = "Subject Name";
             // 
             // dgvSub
             // 
