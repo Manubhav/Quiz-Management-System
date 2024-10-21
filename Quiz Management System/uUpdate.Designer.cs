@@ -1,4 +1,7 @@
-﻿namespace Quiz_Management_System
+﻿using Quiz_Management_System.Models;
+using System.Windows.Forms;
+
+namespace Quiz_Management_System
 {
     partial class uUpdate
     {
@@ -59,7 +62,7 @@
             this.label1.Name = "label1";
             this.label1.Size = new System.Drawing.Size(115, 30);
             this.label1.TabIndex = 5;
-            this.label1.Text = "Redaktə et";
+            this.label1.Text = "Edit";
             // 
             // label3
             // 
@@ -69,7 +72,7 @@
             this.label3.Name = "label3";
             this.label3.Size = new System.Drawing.Size(47, 21);
             this.label3.TabIndex = 7;
-            this.label3.Text = "Fənn";
+            this.label3.Text = "Subject";
             // 
             // label2
             // 
@@ -79,7 +82,7 @@
             this.label2.Name = "label2";
             this.label2.Size = new System.Drawing.Size(42, 21);
             this.label2.TabIndex = 8;
-            this.label2.Text = "Sual";
+            this.label2.Text = "Question";
             // 
             // label4
             // 
@@ -89,7 +92,7 @@
             this.label4.Name = "label4";
             this.label4.Size = new System.Drawing.Size(75, 21);
             this.label4.TabIndex = 9;
-            this.label4.Text = "Cavab A";
+            this.label4.Text = "Answer A";
             // 
             // label5
             // 
@@ -99,7 +102,7 @@
             this.label5.Name = "label5";
             this.label5.Size = new System.Drawing.Size(75, 21);
             this.label5.TabIndex = 10;
-            this.label5.Text = "Cavab B";
+            this.label5.Text = "Answer B";
             // 
             // label6
             // 
@@ -109,7 +112,7 @@
             this.label6.Name = "label6";
             this.label6.Size = new System.Drawing.Size(76, 21);
             this.label6.TabIndex = 11;
-            this.label6.Text = "Cavab C";
+            this.label6.Text = "Answer C";
             // 
             // label7
             // 
@@ -119,7 +122,7 @@
             this.label7.Name = "label7";
             this.label7.Size = new System.Drawing.Size(76, 21);
             this.label7.TabIndex = 12;
-            this.label7.Text = "Cavab D";
+            this.label7.Text = "Answer D";
             // 
             // label8
             // 
@@ -129,7 +132,7 @@
             this.label8.Name = "label8";
             this.label8.Size = new System.Drawing.Size(116, 21);
             this.label8.TabIndex = 13;
-            this.label8.Text = "Düzgün cavab";
+            this.label8.Text = "Correct Answer";
             // 
             // textBox2
             // 
@@ -182,8 +185,6 @@
             this.updateDGV.RowTemplate.Height = 25;
             this.updateDGV.Size = new System.Drawing.Size(626, 170);
             this.updateDGV.TabIndex = 21;
-            this.updateDGV.CellClick += new System.Windows.Forms.DataGridViewCellEventHandler(this.updateDGV_CellClick);
-            this.updateDGV.CellContentClick += new System.Windows.Forms.DataGridViewCellEventHandler(this.dataGridView1_CellContentClick);
             // 
             // comboBox1
             // 
@@ -199,7 +200,7 @@
             this.button4.Name = "button4";
             this.button4.Size = new System.Drawing.Size(75, 23);
             this.button4.TabIndex = 23;
-            this.button4.Text = "Seç";
+            this.button4.Text = "Select";
             this.button4.UseVisualStyleBackColor = true;
             this.button4.Click += new System.EventHandler(this.button4_Click);
             // 
@@ -209,7 +210,7 @@
             this.button1.Name = "button1";
             this.button1.Size = new System.Drawing.Size(92, 33);
             this.button1.TabIndex = 24;
-            this.button1.Text = "Redaktə et";
+            this.button1.Text = "Edit";
             this.button1.UseVisualStyleBackColor = true;
             this.button1.Click += new System.EventHandler(this.button1_Click);
             // 

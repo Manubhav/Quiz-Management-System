@@ -1,29 +1,29 @@
-﻿using ExcelDataReader;
+﻿using Firebase.Database;
+using Firebase.Database.Query;
 using System;
-using System.Collections.Generic;
-using System.ComponentModel;
-using System.Data;
-using System.Data.SqlClient;
+using System.IO;
 using System.Diagnostics;
-using System.Drawing;
 using System.Linq;
-using System.Text;
 using System.Threading.Tasks;
 using System.Windows.Forms;
-
+using Quiz_Management_System.Models;
 
 namespace Quiz_Management_System
 {
     public partial class NewSubject : UserControl
     {
-        static SqlConnection con = new SqlConnection(@"Data Source=DESKTOP-M42063Q;Initial Catalog=Quiz_Management_System;Integrated Security=True");
-        static SqlCommand scmd;
+        // Initialize Firebase client
+        private readonly FirebaseClient firebaseClient;
+
         public NewSubject()
         {
             InitializeComponent();
+            FirebaseInitializer.InitializeFirebase(); // Initialize Firebase
+            firebaseClient = new FirebaseClient("https://smart-learning-system-a2c86-default-rtdb.asia-southeast1.firebasedatabase.app");
         }
 
-        private void addSubBtn_Click(object sender, EventArgs e)
+        // Adding a new subject to Firebase
+        private async void addSubBtn_Click(object sender, EventArgs e)
         {
             if (!Authenticate())
             {
@@ -31,52 +31,36 @@ namespace Quiz_Management_System
                 return;
             }
 
-            string query = "INSERT INTO Subjects(Name)" +
-                "VALUES (@Name)";
-
-            con.Open();
-
-            scmd = new SqlCommand(query, con);
-
-            //add parameters
-
-
-
-            scmd.Parameters.Add("@Name", SqlDbType.NVarChar);
-            scmd.Parameters["@Name"].Value = addnewsubtxt.Text;
-
-            scmd.ExecuteNonQuery();
-            con.Close();
-            MessageBox.Show("Successful");
-
+            // Add new subject to Firebase
+            await firebaseClient
+                .Child("Subjects")
+                .PostAsync(new { Name = addnewsubtxt.Text });
+            MessageBox.Show("Subject added successfully");
         }
+
+        // Validate if subject textbox is not empty
         bool Authenticate()
         {
-            if (string.IsNullOrWhiteSpace(addnewsubtxt.Text))
-
-                return false;
-            else return true;
-
+            return !string.IsNullOrWhiteSpace(addnewsubtxt.Text);
         }
 
+        // Open a file using OpenFileDialog
         private void button1_Click(object sender, EventArgs e)
         {
             OpenFileDialog dlg = new OpenFileDialog();
             dlg.ShowDialog();
             filePath.Text = dlg.FileName;
-
-
         }
 
-
-
-        private void button2_Click(object sender, EventArgs e)
+        // Save the file to Firebase
+        private async void button2_Click(object sender, EventArgs e)
         {
-            SaveFile(filePath.Text);
-            MessageBox.Show("Saved");
+            await SaveFile(filePath.Text);
+            MessageBox.Show("File saved successfully");
         }
 
-        private void SaveFile(string filePath)
+        // Method to save a file (as a byte array in Firebase)
+        private async Task SaveFile(string filePath)
         {
             using (Stream stream = File.OpenRead(filePath))
             {
@@ -87,117 +71,109 @@ namespace Quiz_Management_System
                 string extn = fi.Extension;
                 string name = fi.Name;
 
-                string query = "INSERT INTO Lecture(Data, Extension, FileName, Subject_id)" +
-                    "VALUES(@data, @extn, @name, @sub_id)";
-
-                using (SqlConnection cn = GetSqlConnection())
-                {
-                    SqlCommand cmd = new SqlCommand(query, cn);
-
-                    cmd.Parameters.Add("@data", SqlDbType.VarBinary).Value = buffer;
-                    cmd.Parameters.Add("@extn", SqlDbType.Char).Value = extn;
-                    cmd.Parameters.Add("@name", SqlDbType.VarChar).Value = name;
-                    cmd.Parameters.Add("@sub_id", SqlDbType.Int).Value = subLec.Text;
-                    cn.Open();
-                    cmd.ExecuteNonQuery();
-
-
-                }
-
+                // Store file as Base64 string in Firebase
+                await firebaseClient
+                    .Child("Lectures")
+                    .PostAsync(new
+                    {
+                        Data = Convert.ToBase64String(buffer),
+                        Extension = extn,
+                        FileName = name,
+                        Subject_id = subLec.Text
+                    });
             }
         }
 
-        private SqlConnection GetSqlConnection()
+        // Load subjects and lectures from Firebase on form load
+        private async void NewSubject_Load(object sender, EventArgs e)
         {
-            return new SqlConnection(@"Data Source=DESKTOP-M42063Q;Initial Catalog=Quiz_Management_System;Integrated Security=True");
+            await LoadData();
         }
 
-        private void NewSubject_Load(object sender, EventArgs e)
+        // Method to load data from Firebase (subjects and lectures)
+        private async Task LoadData()
         {
-            LoadData();
-        }
+            // Load subjects
+            var subjects = (await firebaseClient
+                .Child("Subjects")
+                .OnceAsync<dynamic>())
+                .Select(item => new
+                {
+                    Id = item.Key,
+                    Name = item.Object.Name
+                })
+                .ToList();
 
-        private void LoadData()
-        {
-            using (SqlConnection cn = GetSqlConnection())
+            if (subjects.Any())
             {
+                dgvSub.DataSource = subjects;
+            }
 
-                string query1 = "SELECT * FROM Subjects";
-                SqlDataAdapter adp1 = new SqlDataAdapter(query1, cn);
-                DataTable dt1 = new DataTable();
-                adp1.Fill(dt1);
-                if (dt1.Rows.Count > 0)
+            // Load lectures
+            var lectures = (await firebaseClient
+                .Child("Lectures")
+                .OnceAsync<dynamic>())
+                .Select(item => new
                 {
-                    dgvSub.DataSource = dt1;
-                }
+                    Id = item.Key,
+                    FileName = item.Object.FileName,
+                    Extension = item.Object.Extension,
+                    Subject_id = item.Object.Subject_id
+                })
+                .ToList();
 
-
-
-                string query = "SELECT le.Id, le.FileName, le.Extension, sub.Name FROM Lecture le inner join Subjects sub on sub.Id = le.Subject_id  ";
-                SqlDataAdapter adp = new SqlDataAdapter(query, cn);
-                DataTable dt = new DataTable();
-                adp.Fill(dt);
-
-
-                if (dt.Rows.Count > 0)
-                {
-                    dgvDocuments.DataSource = dt;
-                }
+            if (lectures.Any())
+            {
+                dgvDocuments.DataSource = lectures;
             }
         }
 
-        private void button3_Click(object sender, EventArgs e)
+        // Open file for the selected row in dgvDocuments
+        private async void button3_Click(object sender, EventArgs e)
         {
             var selectedRow = dgvDocuments.SelectedRows;
             foreach (var row in selectedRow)
             {
-                int id = (int)((DataGridViewRow)row).Cells[0].Value;
-
-                OpenFile(id);
-            }
-        }
-        private void OpenFile(int id)
-        {
-            using (SqlConnection cn = GetSqlConnection())
-            {
-                string query = "SELECT Data, FileName, Extension FROM Lecture WHERE Id = @id ";
-                SqlCommand cmd = new SqlCommand(query, cn);
-                cmd.Parameters.Add("@id", SqlDbType.Int).Value = id;
-                cn.Open();
-                var reader = cmd.ExecuteReader();
-                if (reader.Read())
-                {
-                    var name = reader["FileName"].ToString();
-                    var data = (byte[])reader["Data"];
-
-                    var extn = reader["Extension"].ToString();
-
-                    var newFileName = name.Replace(extn, DateTime.Now.ToString("ddMMyyyyhhmmss")) + extn;
-                    File.WriteAllBytes(newFileName, data);
-
-                    //System.Diagnostics.Process.Start(newFileName);
-                    Process.Start(new ProcessStartInfo { FileName = newFileName, UseShellExecute = true });
-                }
+                string id = ((DataGridViewRow)row).Cells[0].Value.ToString();
+                await OpenFile(id);
             }
         }
 
-        private void button4_Click(object sender, EventArgs e)
+        // Method to retrieve and open a file from Firebase
+        private async Task OpenFile(string id)
         {
-            LoadData();
+            // Get file data from Firebase
+            var lecture = await firebaseClient
+                .Child("Lectures")
+                .Child(id)
+                .OnceSingleAsync<dynamic>();
+
+            var name = lecture.FileName.ToString();
+            var data = Convert.FromBase64String(lecture.Data.ToString());
+            var extn = lecture.Extension.ToString();
+
+            var newFileName = name.Replace(extn, DateTime.Now.ToString("ddMMyyyyhhmmss")) + extn;
+            File.WriteAllBytes(newFileName, data);
+
+            // Open the saved file
+            Process.Start(new ProcessStartInfo { FileName = newFileName, UseShellExecute = true });
         }
 
-        private void button5_Click(object sender, EventArgs e)
+        // Reload subjects and lectures data
+        private async void button4_Click(object sender, EventArgs e)
         {
-            LoadData();
+            await LoadData();
         }
 
-        
-
-        
+        // Reload data on button5 click
+        private async void button5_Click(object sender, EventArgs e)
+        {
+            await LoadData();
+        }
 
         private void dgvDocuments_CellContentClick(object sender, DataGridViewCellEventArgs e)
         {
-
+            // Optional event if specific action needed when cell clicked
         }
     }
 }

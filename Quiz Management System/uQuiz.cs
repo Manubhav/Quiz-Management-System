@@ -1,26 +1,18 @@
-﻿using System;
+﻿using Firebase.Database;
+using Firebase.Database.Query;
+using System;
 using System.Collections.Generic;
-using System.ComponentModel;
 using System.Data;
-using System.Data.SqlClient;
-using System.Drawing;
 using System.Linq;
-using System.Text;
 using System.Threading.Tasks;
 using System.Windows.Forms;
+using Quiz_Management_System.Models;
 
 namespace Quiz_Management_System
 {
     public partial class uQuiz : UserControl
     {
-        //public string stuName { get; set; }
-        static SqlConnection con = new SqlConnection(@"Data Source=DESKTOP-M42063Q;Initial Catalog=Quiz_Management_System;Integrated Security=True");
-        static SqlCommand scmd;
-
-        public uQuiz()
-        {
-            InitializeComponent();
-        }
+        private readonly FirebaseClient firebaseClient;
         int i = 0, point = 0, questionCount = 0;
         List<string> answers;
         List<string> variantA;
@@ -28,59 +20,64 @@ namespace Quiz_Management_System
         List<string> variantC;
         List<string> variantD;
         List<string> content;
-        private void ComboLoad()
+
+        public uQuiz()
         {
-
-            SqlConnection con = new SqlConnection(@"Data Source=DESKTOP-M42063Q;Initial Catalog=Quiz_Management_System;Integrated Security=True");
-            SqlCommand cmd;
-            comboBox1.Items.Clear();
-            con.Open();
-            cmd = con.CreateCommand();
-            cmd.CommandType = CommandType.Text;
-            cmd.CommandText = "SELECT sub.Name FROM Questions q INNER JOIN Subjects sub ON q.Subject_id=sub.Id";
-            cmd.ExecuteNonQuery();
-            DataTable dtbl = new DataTable();
-            SqlDataAdapter dta = new SqlDataAdapter(cmd);
-            dta.Fill(dtbl);
-
-
-            foreach (DataRow dr in dtbl.Rows)
-            {
-                comboBox1.Items.Add(dr["Name"].ToString());
-
-            }
-            con.Close();
+            InitializeComponent();
+            FirebaseInitializer.InitializeFirebase(); // Initialize Firebase
+            firebaseClient = new FirebaseClient("https://smart-learning-system-a2c86-default-rtdb.asia-southeast1.firebasedatabase.app");
         }
+
+        private async void ComboLoad()
+        {
+            comboBox1.Items.Clear();
+
+            var subjects = (await firebaseClient
+                .Child("Subjects")
+                .OnceAsync<dynamic>())
+                .Select(item => new
+                {
+                    Name = item.Object.Name,
+                    Id = item.Key
+                })
+                .ToList();
+
+            comboBox1.DataSource = subjects;
+            comboBox1.DisplayMember = "Name";
+            comboBox1.ValueMember = "Id";
+        }
+
         private void uQuiz_Load(object sender, EventArgs e)
         {
             lblEmail.Text = Properties.Settings.Default.studentEmail;
             loadSubjects();
         }
-        private void loadSubjects()
+
+        private async void loadSubjects()
         {
             try
             {
-                using (SqlConnection con = new SqlConnection(@"Data Source=DESKTOP-M42063Q;Initial Catalog=Quiz_Management_System;Integrated Security=True"))
-                {
-                    string strSQL = "SELECT * FROM Subjects";
-                    using (SqlDataAdapter da = new SqlDataAdapter(strSQL, con))
+                var subjects = (await firebaseClient
+                    .Child("Subjects")
+                    .OnceAsync<dynamic>())
+                    .Select(item => new
                     {
-                        con.Open();
-                        DataSet ds = new DataSet();
-                        da.Fill(ds);
-                        comboBox1.DataSource = ds.Tables[0];
-                        comboBox1.DisplayMember = "Name";
-                        comboBox1.ValueMember = "Id";
-                    }
-                }
-            }
-            catch (Exception)
-            {
+                        Name = item.Object.Name,
+                        Id = item.Key
+                    })
+                    .ToList();
 
-                throw;
+                comboBox1.DataSource = subjects;
+                comboBox1.DisplayMember = "Name";
+                comboBox1.ValueMember = "Id";
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show(ex.Message);
             }
         }
-        private void RandomData()
+
+        private async Task RandomData()
         {
             answers = new List<string>();
             variantA = new List<string>();
@@ -88,69 +85,51 @@ namespace Quiz_Management_System
             variantC = new List<string>();
             variantD = new List<string>();
             content = new List<string>();
-            string connectionString = "Data Source=DESKTOP-M42063Q;Initial Catalog=Quiz_Management_System;Integrated Security=True";
 
-            string query1 = "SELECT q.Content,q.Answer1,q.Answer2,q.Answer3,q.Answer4,q.CorrectAnswer FROM Questions q INNER JOIN Subjects sub ON q.Subject_id=sub.Id WHERE q.Subject_id = @sid";
-
-            using (SqlConnection connection = new SqlConnection(connectionString))
-            {
-                connection.Open();
-
-                using (SqlCommand command = new SqlCommand(query1, connection))
+            var questions = (await firebaseClient
+                .Child("Questions")
+                .OrderBy("Subject_id")
+                .EqualTo(comboBox1.SelectedValue.ToString())
+                .OnceAsync<dynamic>())
+                .Select(item => new
                 {
-                    command.Parameters.AddWithValue(@"sid", comboBox1.SelectedValue);
-                    SqlDataReader reader = command.ExecuteReader();
+                    Content = item.Object.Content,
+                    Answer1 = item.Object.Answer1,
+                    Answer2 = item.Object.Answer2,
+                    Answer3 = item.Object.Answer3,
+                    Answer4 = item.Object.Answer4,
+                    CorrectAnswer = item.Object.CorrectAnswer
+                })
+                .ToList();
 
-                    while (reader.Read())
-                    {
-                        string question = reader["Content"].ToString();
-                        string data1 = reader["Answer1"].ToString();
-                        string data2 = reader["Answer2"].ToString();
-                        string data3 = reader["Answer3"].ToString();
-                        string data4 = reader["Answer4"].ToString();
-                        string answer = reader["CorrectAnswer"].ToString();
-
-                        content.Add(question);
-                        variantA.Add(data1);
-                        variantB.Add(data2);
-                        variantC.Add(data3);
-                        variantD.Add(data4);
-                        answers.Add(answer);
-                    }
-
-                    reader.Close();
-                }
+            foreach (var question in questions)
+            {
+                content.Add(question.Content);
+                variantA.Add(question.Answer1);
+                variantB.Add(question.Answer2);
+                variantC.Add(question.Answer3);
+                variantD.Add(question.Answer4);
+                answers.Add(question.CorrectAnswer);
             }
 
+            questionCount = questions.Count;
 
-            using (SqlConnection connection = new SqlConnection(connectionString))
+            if (questionCount > 0)
             {
-                connection.Open();
-                string queryCount = "SELECT COUNT(ID) FROM Questions WHERE Subject_id = @sid";
-                using (SqlCommand command = new SqlCommand(queryCount, connection))
-                {
-                    command.Parameters.AddWithValue(@"sid", comboBox1.SelectedValue);
-
-                    questionCount = Convert.ToInt32(command.ExecuteScalar());
-                }
+                textBox2.Text = content[i];
+                radioButton1.Text = variantA[i];
+                radioButton2.Text = variantB[i];
+                radioButton3.Text = variantC[i];
+                radioButton4.Text = variantD[i];
             }
-
-
-            textBox2.Text = content[i];
-            radioButton1.Text = variantA[i];
-            radioButton2.Text = variantB[i];
-            radioButton3.Text = variantC[i];
-            radioButton4.Text = variantD[i];
-
         }
 
-        private void button1_Click(object sender, EventArgs e)
+        private async void button1_Click(object sender, EventArgs e)
         {
-            RandomData();
-
+            await RandomData();
         }
 
-        private void button2_Click(object sender, EventArgs e)
+        private async void button2_Click(object sender, EventArgs e)
         {
         A:
             if (i < questionCount)
@@ -171,34 +150,37 @@ namespace Quiz_Management_System
                 {
                     point++;
                 }
-                lblPoint.Text = "Xal : " + point;
+
+                lblPoint.Text = "Score : " + point;
                 i++;
 
                 if (i == questionCount)
                     goto A;
+
                 textBox2.Text = content[i];
                 radioButton1.Text = variantA[i];
                 radioButton2.Text = variantB[i];
                 radioButton3.Text = variantC[i];
                 radioButton4.Text = variantD[i];
-
             }
             else
             {
-                MessageBox.Show($"Suallar bitdi. Topladığınız bal:{point}");
+                MessageBox.Show($"Quiz finished. Your score: {point}");
 
-
-                string query = "INSERT INTO SubjectStudent(Student_id, Subject_id, Score) VALUES((SELECT Students.Id from Students where Students.Email like '"+lblEmail.Text+"%'), (SELECT Subjects.Id FROM Subjects WHERE Subjects.Name LIKE '"+comboBox1.Text+"%'), @point)";
-                con.Open();
-                scmd = new SqlCommand(query, con);
-
-                scmd.Parameters.Add("@point", SqlDbType.Int);
-                scmd.Parameters["@point"].Value = point;
-
-
-                scmd.ExecuteNonQuery();
-                con.Close();
-
+                // Save the score in Firebase
+                await firebaseClient        
+                    .Child("SubjectStudent")
+                    .PostAsync(new
+                    {
+                        Student_id = (await firebaseClient
+                            .Child("Students")
+                            .OrderBy("Email")
+                            .EqualTo(lblEmail.Text)
+                            .OnceAsync<dynamic>())
+                            .FirstOrDefault()?.Key,
+                        Subject_id = comboBox1.SelectedValue.ToString(),
+                        Score = point
+                    });
             }
         }
     }

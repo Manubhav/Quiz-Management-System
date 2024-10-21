@@ -1,118 +1,86 @@
-﻿using System;
-using System.Collections.Generic;
-using System.ComponentModel;
+﻿using Firebase.Database;
+using Firebase.Database.Query;
 using System.Data;
-using System.Data.SqlClient;
-using System.Drawing;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using System.Windows.Forms;
-using static System.Windows.Forms.VisualStyles.VisualStyleElement;
 
 namespace Quiz_Management_System.Teacher_UC
 {
     public partial class UC_AddNewQuestion : UserControl
     {
-        static SqlConnection con = new SqlConnection(@"Data Source=DESKTOP-M42063Q;Initial Catalog=Quiz_Management_System;Integrated Security=True");
-        static SqlCommand scmd;
+        // Initialize Firebase client
+        private readonly FirebaseClient firebaseClient;
+
         public UC_AddNewQuestion()
         {
             InitializeComponent();
+            FirebaseInitializer.InitializeFirebase(); // Initialize Firebase
+            firebaseClient = new FirebaseClient("https://smart-learning-system-a2c86-default-rtdb.asia-southeast1.firebasedatabase.app");
         }
 
-        private void addQuesBtn_Click(object sender, EventArgs e)
+        // Adding a new question to Firebase
+        private async void addQuesBtn_Click(object sender, EventArgs e)
         {
-            //int selectedIndex = selectSubCombo.SelectedIndex + 1;
-            //Object selectedItem = selectSubCombo.SelectedItem;
-
-            //MessageBox.Show("Selected Item Text: " + selectedItem.ToString() + "\n" +
-            //                "Index: " + selectedIndex);
-
             if (!Authenticate())
             {
                 MessageBox.Show("Don't keep any textbox blank!");
                 return;
             }
-           
-            string query = "INSERT INTO Questions(Subject_id, Content, Answer1, Answer2, Answer3, Answer4, CorrectAnswer)" +
-                "VALUES (@Subject_id, @Content, @Answer1, @Answer2, @Answer3, @Answer4, @CorrectAnswer)";
-               
-            con.Open();
-           
-            scmd = new SqlCommand(query, con);
 
-            //add parameters
+            // Add new question to Firebase
+            await firebaseClient
+                .Child("Questions")
+                .PostAsync(new
+                {
+                    Subject_id = comboBox1.SelectedIndex + 1,
+                    Content = questionContent.Text,
+                    Answer1 = answerA.Text,
+                    Answer2 = answerB.Text,
+                    Answer3 = answerC.Text,
+                    Answer4 = answerD.Text,
+                    CorrectAnswer = CorrectAnswer.Text
+                });
 
-            scmd.Parameters.Add("@Subject_id", SqlDbType.Int);
-            scmd.Parameters["@Subject_id"].Value = comboBox1.SelectedIndex+1;
-
-            scmd.Parameters.Add("@Content", SqlDbType.NVarChar);
-            scmd.Parameters["@Content"].Value = questionContent.Text;
-
-            scmd.Parameters.Add("@Answer1", SqlDbType.NVarChar);
-            scmd.Parameters["@Answer1"].Value = answerA.Text;
-
-            scmd.Parameters.Add("@Answer2", SqlDbType.NVarChar);
-            scmd.Parameters["@Answer2"].Value = answerB.Text;
-
-            scmd.Parameters.Add("@Answer3", SqlDbType.NVarChar);
-            scmd.Parameters["@Answer3"].Value = answerC.Text;
-
-            scmd.Parameters.Add("@Answer4", SqlDbType.NVarChar);
-            scmd.Parameters["@Answer4"].Value = answerD.Text;
-
-            scmd.Parameters.Add("@CorrectAnswer", SqlDbType.NVarChar);
-            scmd.Parameters["@CorrectAnswer"].Value = CorrectAnswer.Text;
-
-            scmd.ExecuteNonQuery();
-            con.Close();
-
-            MessageBox.Show("Added");
-
-
+            MessageBox.Show("Question added successfully");
         }
+
+        // Authenticate input fields
         bool Authenticate()
         {
-            if (string.IsNullOrWhiteSpace(comboBox1.Text) ||
-                string.IsNullOrWhiteSpace(questionContent.Text) ||
-                string.IsNullOrWhiteSpace(answerA.Text) ||
-                string.IsNullOrWhiteSpace(answerB.Text) ||
-                string.IsNullOrWhiteSpace(answerC.Text) ||
-                string.IsNullOrWhiteSpace(answerD.Text) ||
-                string.IsNullOrWhiteSpace(CorrectAnswer.Text)
-                )
-
-                return false;
-            else return true;
-
+            return !(string.IsNullOrWhiteSpace(comboBox1.Text) ||
+                     string.IsNullOrWhiteSpace(questionContent.Text) ||
+                     string.IsNullOrWhiteSpace(answerA.Text) ||
+                     string.IsNullOrWhiteSpace(answerB.Text) ||
+                     string.IsNullOrWhiteSpace(answerC.Text) ||
+                     string.IsNullOrWhiteSpace(answerD.Text) ||
+                     string.IsNullOrWhiteSpace(CorrectAnswer.Text));
         }
-        private void ComboLoad()
+
+        // Load subjects into comboBox from Firebase
+        private async void ComboLoad()
         {
-            SqlConnection con = new SqlConnection(@"Data Source=DESKTOP-M42063Q;Initial Catalog=Quiz_Management_System;Integrated Security=True");
-            SqlCommand cmd;
             comboBox1.Items.Clear();
-            con.Open();
-            cmd = con.CreateCommand();
-            cmd.CommandType = CommandType.Text;
-            cmd.CommandText = "SELECT Name FROM Subjects";
-            cmd.ExecuteNonQuery();
-            DataTable dtbl = new DataTable();
-            SqlDataAdapter dta = new SqlDataAdapter(cmd);
-            dta.Fill(dtbl);
 
+            // Get subjects from Firebase
+            var subjects = (await firebaseClient
+                .Child("Subjects")
+                .OnceAsync<dynamic>())
+                .Select(item => new
+                {
+                    Name = item.Object.Name
+                })
+                .ToList();
 
-            foreach (DataRow dr in dtbl.Rows)
+            foreach (var subject in subjects)
             {
-                comboBox1.Items.Add(dr["Name"].ToString());
-
+                comboBox1.Items.Add(subject.Name);
             }
-            con.Close();
+            MessageBox.Show($"Subjects fetched: {subjects.Count}");
+
         }
+
+        // Load subjects when the form loads
         private void UC_AddNewQuestion_Load(object sender, EventArgs e)
         {
             ComboLoad();
-
         }
     }
 }

@@ -63,7 +63,7 @@
             this.label1.Name = "label1";
             this.label1.Size = new System.Drawing.Size(181, 30);
             this.label1.TabIndex = 5;
-            this.label1.Text = "Tələbə qeydiyyatı";
+            this.label1.Text = "Student Registration";
             // 
             // label2
             // 
@@ -73,7 +73,7 @@
             this.label2.Name = "label2";
             this.label2.Size = new System.Drawing.Size(49, 21);
             this.label2.TabIndex = 6;
-            this.label2.Text = "Qrup";
+            this.label2.Text = "Group";
             // 
             // label3
             // 
@@ -83,7 +83,7 @@
             this.label3.Name = "label3";
             this.label3.Size = new System.Drawing.Size(58, 21);
             this.label3.TabIndex = 7;
-            this.label3.Text = "İxtisas";
+            this.label3.Text = "Specciality";
             // 
             // textBox1
             // 
@@ -105,7 +105,7 @@
             this.button1.Name = "button1";
             this.button1.Size = new System.Drawing.Size(75, 23);
             this.button1.TabIndex = 10;
-            this.button1.Text = "Daxil et";
+            this.button1.Text = "Submit";
             this.button1.UseVisualStyleBackColor = true;
             this.button1.Click += new System.EventHandler(this.button1_Click);
             // 
@@ -115,7 +115,7 @@
             this.button2.Name = "button2";
             this.button2.Size = new System.Drawing.Size(75, 23);
             this.button2.TabIndex = 11;
-            this.button2.Text = "Yenilə";
+            this.button2.Text = "Update";
             this.button2.UseVisualStyleBackColor = true;
             this.button2.Click += new System.EventHandler(this.button2_Click);
             // 
@@ -136,7 +136,7 @@
             this.label4.Name = "label4";
             this.label4.Size = new System.Drawing.Size(73, 21);
             this.label4.TabIndex = 13;
-            this.label4.Text = "Qrup İD";
+            this.label4.Text = "Group İD";
             // 
             // label5
             // 
@@ -146,7 +146,7 @@
             this.label5.Name = "label5";
             this.label5.Size = new System.Drawing.Size(111, 21);
             this.label5.TabIndex = 14;
-            this.label5.Text = "Tələbənin adı";
+            this.label5.Text = "First Name";
             // 
             // label6
             // 
@@ -156,7 +156,7 @@
             this.label6.Name = "label6";
             this.label6.Size = new System.Drawing.Size(138, 21);
             this.label6.TabIndex = 15;
-            this.label6.Text = "Tələbənin soyadı";
+            this.label6.Text = "Last Name";
             // 
             // label7
             // 
@@ -166,7 +166,7 @@
             this.label7.Name = "label7";
             this.label7.Size = new System.Drawing.Size(37, 21);
             this.label7.TabIndex = 16;
-            this.label7.Text = "Yaş";
+            this.label7.Text = "Age";
             // 
             // textBox3
             // 
@@ -202,7 +202,7 @@
             this.button3.Name = "button3";
             this.button3.Size = new System.Drawing.Size(101, 23);
             this.button3.TabIndex = 21;
-            this.button3.Text = "Daxil et";
+            this.button3.Text = "Submit";
             this.button3.UseVisualStyleBackColor = true;
             this.button3.Click += new System.EventHandler(this.button3_Click);
             // 
@@ -212,7 +212,7 @@
             this.button4.Name = "button4";
             this.button4.Size = new System.Drawing.Size(101, 23);
             this.button4.TabIndex = 22;
-            this.button4.Text = "Yenilə";
+            this.button4.Text = "Update";
             this.button4.UseVisualStyleBackColor = true;
             this.button4.Click += new System.EventHandler(this.button4_Click);
             // 
@@ -257,7 +257,7 @@
             this.label9.Name = "label9";
             this.label9.Size = new System.Drawing.Size(45, 21);
             this.label9.TabIndex = 27;
-            this.label9.Text = "Şifrə";
+            this.label9.Text = "Password";
             // 
             // uStuReg
             // 

@@ -1,15 +1,4 @@
-﻿using Quiz_Management_System.Teacher_UC;
-using System;
-using System.Collections.Generic;
-using System.ComponentModel;
-using System.Data;
-using System.Drawing;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using System.Windows.Forms;
-
-namespace Quiz_Management_System
+﻿namespace Quiz_Management_System
 {
     public partial class AppForm : Form
     {
@@ -75,7 +64,7 @@ namespace Quiz_Management_System
 
         private void button3_Click(object sender, EventArgs e)
         {
-           
+
             udelete1.Visible = true;
             uC_AddNewQuestion1.Visible = false;
             newSubject1.Visible = false;

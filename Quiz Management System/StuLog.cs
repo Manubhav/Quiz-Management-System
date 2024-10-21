@@ -1,12 +1,10 @@
-﻿using FirebaseAdmin;
-using FirebaseAdmin.Auth;
-using Firebase.Database;
+﻿using Firebase.Database;
 using Firebase.Database.Query;
-using Google.Apis.Auth.OAuth2;
 using System;
 using System.Linq;
 using System.Threading.Tasks;
 using System.Windows.Forms;
+using Quiz_Management_System.Models;
 
 namespace Quiz_Management_System
 {
@@ -17,13 +15,7 @@ namespace Quiz_Management_System
         public StuLog()
         {
             InitializeComponent();
-
-            // Initialize Firebase
-            FirebaseApp.Create(new AppOptions()
-            {
-                Credential = GoogleCredential.FromFile("F:\\UTS\\Sem-IV\\.NET App Dev\\Quiz_Management_System-master\\Quiz Management System\\smart-learning-system-a2c86-firebase-adminsdk-265q7-82bc2c0986.json"),
-            });
-
+            FirebaseInitializer.InitializeFirebase(); // Initialize Firebase
             firebaseClient = new FirebaseClient("https://smart-learning-system-a2c86-default-rtdb.asia-southeast1.firebasedatabase.app");
         }
 
@@ -65,18 +57,12 @@ namespace Quiz_Management_System
             Close();
         }
 
-        bool Authenticate()
+        private bool Authenticate()
         {
             if (string.IsNullOrWhiteSpace(EmailLog.Text) || string.IsNullOrWhiteSpace(PassLog.Text))
                 return false;
 
             return true;
         }
-    }
-
-    public class Student
-    {
-        public string Email { get; set; }
-        public string Password { get; set; }
     }
 }

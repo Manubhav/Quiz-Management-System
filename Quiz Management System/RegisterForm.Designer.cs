@@ -50,7 +50,7 @@
             this.label2.Name = "label2";
             this.label2.Size = new System.Drawing.Size(63, 30);
             this.label2.TabIndex = 1;
-            this.label2.Text = "Soyad";
+            this.label2.Text = "Last Name";
             // 
             // NameTxt
             // 
@@ -98,7 +98,7 @@
             this.RegBtn.Name = "RegBtn";
             this.RegBtn.Size = new System.Drawing.Size(158, 35);
             this.RegBtn.TabIndex = 10;
-            this.RegBtn.Text = "Qeydiyyat";
+            this.RegBtn.Text = "Registration";
             this.RegBtn.UseVisualStyleBackColor = true;
             this.RegBtn.Click += new System.EventHandler(this.RegBtn_Click);
             // 
@@ -110,7 +110,7 @@
             this.label6.Name = "label6";
             this.label6.Size = new System.Drawing.Size(110, 24);
             this.label6.TabIndex = 11;
-            this.label6.Text = "Qeydiyyat";
+            this.label6.Text = "Registration";
             // 
             // label7
             // 
@@ -120,7 +120,7 @@
             this.label7.Name = "label7";
             this.label7.Size = new System.Drawing.Size(36, 30);
             this.label7.TabIndex = 12;
-            this.label7.Text = "Ad";
+            this.label7.Text = "Name";
             // 
             // label1
             // 
@@ -130,7 +130,7 @@
             this.label1.Name = "label1";
             this.label1.Size = new System.Drawing.Size(131, 30);
             this.label1.TabIndex = 13;
-            this.label1.Text = "Elaqe nomresi";
+            this.label1.Text = "Contact Number";
             // 
             // label3
             // 
@@ -150,7 +150,7 @@
             this.label4.Name = "label4";
             this.label4.Size = new System.Drawing.Size(52, 30);
             this.label4.TabIndex = 15;
-            this.label4.Text = "Şifre";
+            this.label4.Text = "password";
             // 
             // RegisterForm
             // 
@@ -174,7 +174,6 @@
             this.Name = "RegisterForm";
             this.StartPosition = System.Windows.Forms.FormStartPosition.CenterScreen;
             this.Text = "RegisterForm";
-            this.Load += new System.EventHandler(this.RegisterForm_Load);
             this.ResumeLayout(false);
             this.PerformLayout();
 

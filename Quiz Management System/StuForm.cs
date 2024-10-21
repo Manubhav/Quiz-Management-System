@@ -23,7 +23,7 @@ namespace Quiz_Management_System
 
         }
 
-        private void mühazirələrToolStripMenuItem_Click(object sender, EventArgs e)
+        private void LectureToolStripMenuItem_Click(object sender, EventArgs e)
         {
             uLecture1.Visible = true;
             uQuiz1.Visible = false;

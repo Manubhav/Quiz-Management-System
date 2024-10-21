@@ -56,7 +56,7 @@
             this.label1.Name = "label1";
             this.label1.Size = new System.Drawing.Size(221, 30);
             this.label1.TabIndex = 1;
-            this.label1.Text = "Yeni fənn və mühazirə";
+            this.label1.Text = "New subject and lecture";
             // 
             // label2
             // 
@@ -66,7 +66,7 @@
             this.label2.Name = "label2";
             this.label2.Size = new System.Drawing.Size(79, 21);
             this.label2.TabIndex = 2;
-            this.label2.Text = "Yeni fənn";
+            this.label2.Text = "New Subject";
             // 
             // addnewsubtxt
             // 
@@ -81,7 +81,7 @@
             this.addSubBtn.Name = "addSubBtn";
             this.addSubBtn.Size = new System.Drawing.Size(75, 23);
             this.addSubBtn.TabIndex = 4;
-            this.addSubBtn.Text = "Daxil et";
+            this.addSubBtn.Text = "Enter";
             this.addSubBtn.UseVisualStyleBackColor = true;
             this.addSubBtn.Click += new System.EventHandler(this.addSubBtn_Click);
             // 
@@ -93,7 +93,7 @@
             this.label3.Name = "label3";
             this.label3.Size = new System.Drawing.Size(113, 21);
             this.label3.TabIndex = 5;
-            this.label3.Text = "Yeni mühazirə";
+            this.label3.Text = "New Lecture";
             // 
             // filePath
             // 
@@ -108,7 +108,7 @@
             this.button1.Name = "button1";
             this.button1.Size = new System.Drawing.Size(75, 23);
             this.button1.TabIndex = 8;
-            this.button1.Text = "Seç";
+            this.button1.Text = "Select";
             this.button1.UseVisualStyleBackColor = true;
             this.button1.Click += new System.EventHandler(this.button1_Click);
             // 
@@ -118,7 +118,7 @@
             this.button2.Name = "button2";
             this.button2.Size = new System.Drawing.Size(75, 23);
             this.button2.TabIndex = 9;
-            this.button2.Text = "Daxil et";
+            this.button2.Text = "Enter";
             this.button2.UseVisualStyleBackColor = true;
             this.button2.Click += new System.EventHandler(this.button2_Click);
             // 
@@ -145,7 +145,7 @@
             this.button3.Name = "button3";
             this.button3.Size = new System.Drawing.Size(75, 23);
             this.button3.TabIndex = 12;
-            this.button3.Text = "Aç";
+            this.button3.Text = "Open";
             this.button3.UseVisualStyleBackColor = true;
             this.button3.Click += new System.EventHandler(this.button3_Click);
             // 
@@ -157,7 +157,7 @@
             this.label5.Name = "label5";
             this.label5.Size = new System.Drawing.Size(71, 21);
             this.label5.TabIndex = 13;
-            this.label5.Text = "Fənn İD";
+            this.label5.Text = "Subject ID";
             // 
             // dgvSub
             // 
@@ -174,7 +174,7 @@
             this.button4.Name = "button4";
             this.button4.Size = new System.Drawing.Size(75, 23);
             this.button4.TabIndex = 15;
-            this.button4.Text = "Yenilə";
+            this.button4.Text = "Refresh";
             this.button4.UseVisualStyleBackColor = true;
             this.button4.Click += new System.EventHandler(this.button4_Click);
             // 
@@ -184,7 +184,7 @@
             this.button5.Name = "button5";
             this.button5.Size = new System.Drawing.Size(75, 23);
             this.button5.TabIndex = 16;
-            this.button5.Text = "Yenilə";
+            this.button5.Text = "Refresh";
             this.button5.UseVisualStyleBackColor = true;
             this.button5.Click += new System.EventHandler(this.button5_Click);
             // 

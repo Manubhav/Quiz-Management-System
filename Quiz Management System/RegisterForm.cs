@@ -1,74 +1,64 @@
-﻿using System;
-using System.Collections.Generic;
-using System.ComponentModel;
-using System.Data;
-using System.Data.SqlClient;
-using System.Drawing;
+﻿using Firebase.Database;
+using Firebase.Database.Query;
+using FirebaseAdmin;
+using Google.Apis.Auth.OAuth2;
+using System;
 using System.Linq;
-using System.Text;
 using System.Threading.Tasks;
 using System.Windows.Forms;
+using Quiz_Management_System.Models;
 
 namespace Quiz_Management_System
 {
     public partial class RegisterForm : Form
     {
-        static SqlConnection con = new SqlConnection(@"Data Source=DESKTOP-M42063Q;Initial Catalog=Quiz_Management_System;Integrated Security=True");
-        static SqlCommand scmd;
+        private static FirebaseClient firebaseClient;
+
         public RegisterForm()
         {
             InitializeComponent();
+            FirebaseInitializer.InitializeFirebase(); // Initialize Firebase
+            firebaseClient = new FirebaseClient("https://smart-learning-system-a2c86-default-rtdb.asia-southeast1.firebasedatabase.app");
         }
 
-        private void RegBtn_Click(object sender, EventArgs e)
+        private async void RegBtn_Click(object sender, EventArgs e)
         {
             if (!Authenticate())
             {
                 MessageBox.Show("Don't keep any textbox blank!");
                 return;
             }
-            string query = "INSERT INTO Teachers VALUES (@Name, @Surname, @Number, @Email, @Password)";
-            con.Open();
-            scmd = new SqlCommand(query, con);
 
-            //add parameters
+            // Create a new teacher object
+            var teacher = new Teacher
+            {
+                Name = NameTxt.Text,
+                Surname = SurnameTxt.Text,
+                Number = NumTxt.Text,
+                Email = EmailTxt.Text,
+                Password = PassTxt.Text
+            };
 
-            scmd.Parameters.Add("@Name", SqlDbType.NVarChar);
-            scmd.Parameters["@Name"].Value = NameTxt.Text;
+            // Save to Firebase
+            await firebaseClient
+                .Child("Teachers")
+                .PostAsync(teacher);
 
-            scmd.Parameters.Add("@Surname", SqlDbType.NVarChar);
-            scmd.Parameters["@Surname"].Value = SurnameTxt.Text;
-
-            scmd.Parameters.Add("@Number", SqlDbType.NVarChar);
-            scmd.Parameters["@Number"].Value = NumTxt.Text;
-
-            scmd.Parameters.Add("@Email", SqlDbType.NVarChar);
-            scmd.Parameters["@Email"].Value = EmailTxt.Text;
-
-            scmd.Parameters.Add("@Password", SqlDbType.NVarChar);
-            scmd.Parameters["@Password"].Value = PassTxt.Text;
-
-            scmd.ExecuteNonQuery();
-            con.Close();
+            MessageBox.Show("Registration successful!");
+            Close(); // Optionally close the registration form
         }
 
-        bool Authenticate()
+        private bool Authenticate()
         {
             if (string.IsNullOrWhiteSpace(NameTxt.Text) ||
                 string.IsNullOrWhiteSpace(SurnameTxt.Text) ||
                 string.IsNullOrWhiteSpace(NumTxt.Text) ||
                 string.IsNullOrWhiteSpace(EmailTxt.Text) ||
-                string.IsNullOrWhiteSpace(PassTxt.Text)
-                )
-
+                string.IsNullOrWhiteSpace(PassTxt.Text))
+            {
                 return false;
-            else return true;
-            
-        }
-
-        private void RegisterForm_Load(object sender, EventArgs e)
-        {
-
+            }
+            return true;
         }
     }
 }

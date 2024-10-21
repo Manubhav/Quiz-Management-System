@@ -1,11 +1,8 @@
-﻿using System;
-using System.Collections.Generic;
-using System.ComponentModel;
-using System.Data;
-using System.Data.SqlClient;
-using System.Drawing;
+﻿using Firebase.Database;
+using Firebase.Database.Query;
+using Quiz_Management_System.Models;
+using System;
 using System.Linq;
-using System.Text;
 using System.Threading.Tasks;
 using System.Windows.Forms;
 
@@ -13,94 +10,62 @@ namespace Quiz_Management_System
 {
     public partial class Form2 : Form
     {
-        static SqlConnection con = new SqlConnection(@"Data Source=DESKTOP-M42063Q;Initial Catalog=Quiz_Management_System;Integrated Security=True");
-        static SqlCommand scmd; 
+        private static FirebaseClient firebaseClient;
+
         public Form2()
         {
             InitializeComponent();
+            FirebaseInitializer.InitializeFirebase(); // Initialize Firebase
+            firebaseClient = new FirebaseClient("https://smart-learning-system-a2c86-default-rtdb.asia-southeast1.firebasedatabase.app");
         }
 
-        private void linkLabel1_LinkClicked(object sender, LinkLabelLinkClickedEventArgs e)
+        private async void button1_Click(object sender, EventArgs e)
         {
-            RegisterForm register = new();
-            register.ShowDialog();
-        }
-
-        private void button1_Click(object sender, EventArgs e)
-        {
-            bool isEmailok = false, isPassok = false;
             if (!Authenticate())
             {
                 MessageBox.Show("Don't keep any textbox blank!");
                 return;
             }
 
-            string query = "SELECT * FROM Teachers WHERE Email=@Email";
-            con.Open();
-            scmd = new SqlCommand(query, con);
+            // Check if the user exists in the Teachers collection
+            var teachers = await firebaseClient
+                .Child("Teachers")
+                .OrderByKey()
+                .OnceAsync<Teacher>();
 
-            //add parameters
+            var teacher = teachers.FirstOrDefault(t => t.Object.Email == EmailLog.Text);
 
-            scmd.Parameters.Add("@Email", SqlDbType.NVarChar);
-            scmd.Parameters["@Email"].Value = EmailLog.Text;
-
-
-            SqlDataReader sda = scmd.ExecuteReader();
-
-            if (sda.HasRows)
-            {
-                isEmailok = true;
-            }
-            con.Close();
-
-            con.Open();
-            query = "SELECT * FROM Teachers WHERE Email=@Email AND Password=@Password";
-            scmd = new SqlCommand(query, con);
-
-            //add parameters
-
-            scmd.Parameters.Add("@Email", SqlDbType.NVarChar);
-            scmd.Parameters["@Email"].Value = EmailLog.Text;
-
-            scmd.Parameters.Add("@Password", SqlDbType.NVarChar);
-            scmd.Parameters["@Password"].Value = PassLog.Text;
-
-
-            sda = scmd.ExecuteReader();
-
-            if (sda.HasRows)
-            {
-                isPassok = true;
-            }
-
-            if (isEmailok==false)
+            if (teacher == null)
             {
                 MessageBox.Show("User does not exist!");
+                return;
             }
-            else if (isEmailok == true && isPassok==false)
+
+            if (teacher.Object.Password != PassLog.Text)
             {
-                MessageBox.Show("Something went wrong!");
+                MessageBox.Show("Invalid password!");
+                return;
             }
-            else
-            {
-                Hide();
-                AppForm app = new AppForm();
-                app.ShowDialog();
-                Close();
-            }
-            con.Close();
+
+            // Proceed to next form
+            Hide();
+            AppForm app = new AppForm();
+            app.ShowDialog();
+            Close();
         }
 
-
-        bool Authenticate()
+        private bool Authenticate()
         {
-            if (string.IsNullOrWhiteSpace(EmailLog.Text) ||
-                string.IsNullOrWhiteSpace(PassLog.Text) 
-                )
-
+            if (string.IsNullOrWhiteSpace(EmailLog.Text) || string.IsNullOrWhiteSpace(PassLog.Text))
                 return false;
-            else return true;
 
+            return true;
+        }
+
+        private void linkLabel1_LinkClicked(object sender, LinkLabelLinkClickedEventArgs e)
+        {
+            RegisterForm register = new();
+            register.ShowDialog();
         }
     }
 }

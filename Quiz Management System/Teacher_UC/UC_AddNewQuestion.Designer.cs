@@ -57,7 +57,7 @@
             this.label1.Name = "label1";
             this.label1.Size = new System.Drawing.Size(139, 30);
             this.label1.TabIndex = 0;
-            this.label1.Text = "Sual əlavə et";
+            this.label1.Text = "Add Question";
             // 
             // label2
             // 
@@ -67,15 +67,15 @@
             this.label2.Name = "label2";
             this.label2.Size = new System.Drawing.Size(77, 21);
             this.label2.TabIndex = 1;
-            this.label2.Text = "Fənn seç";
+            this.label2.Text = "Select Subject";
             // 
             // selectSubCombo
             // 
             this.selectSubCombo.Enabled = false;
             this.selectSubCombo.FormattingEnabled = true;
             this.selectSubCombo.Items.AddRange(new object[] {
-            "Sistem muhendisliyi",
-            "Komputer sebekeleri"});
+            "System Engineering",
+            "Computer Networks"});
             this.selectSubCombo.Location = new System.Drawing.Point(397, 65);
             this.selectSubCombo.Name = "selectSubCombo";
             this.selectSubCombo.Size = new System.Drawing.Size(177, 23);
@@ -90,7 +90,7 @@
             this.label3.Name = "label3";
             this.label3.Size = new System.Drawing.Size(42, 21);
             this.label3.TabIndex = 4;
-            this.label3.Text = "Sual";
+            this.label3.Text = "Question";
             // 
             // questionContent
             // 
@@ -143,7 +143,7 @@
             this.label4.Name = "label4";
             this.label4.Size = new System.Drawing.Size(75, 21);
             this.label4.TabIndex = 12;
-            this.label4.Text = "Cavab A";
+            this.label4.Text = "Answer A";
             // 
             // label5
             // 
@@ -153,7 +153,7 @@
             this.label5.Name = "label5";
             this.label5.Size = new System.Drawing.Size(75, 21);
             this.label5.TabIndex = 13;
-            this.label5.Text = "Cavab B";
+            this.label5.Text = "Answer B";
             // 
             // label6
             // 
@@ -163,7 +163,7 @@
             this.label6.Name = "label6";
             this.label6.Size = new System.Drawing.Size(76, 21);
             this.label6.TabIndex = 14;
-            this.label6.Text = "Cavab C";
+            this.label6.Text = "Answer C";
             // 
             // label7
             // 
@@ -173,7 +173,7 @@
             this.label7.Name = "label7";
             this.label7.Size = new System.Drawing.Size(76, 21);
             this.label7.TabIndex = 15;
-            this.label7.Text = "Cavab D";
+            this.label7.Text = "Answer D";
             // 
             // label9
             // 
@@ -184,7 +184,7 @@
             this.label9.Name = "label9";
             this.label9.Size = new System.Drawing.Size(120, 21);
             this.label9.TabIndex = 17;
-            this.label9.Text = "Düzgün Cavab";
+            this.label9.Text = "Correct Answer";
             // 
             // addQuesBtn
             // 
@@ -197,7 +197,7 @@
             this.addQuesBtn.Name = "addQuesBtn";
             this.addQuesBtn.Size = new System.Drawing.Size(284, 42);
             this.addQuesBtn.TabIndex = 18;
-            this.addQuesBtn.Text = "Əlavə et";
+            this.addQuesBtn.Text = "Add";
             this.addQuesBtn.UseVisualStyleBackColor = true;
             this.addQuesBtn.Click += new System.EventHandler(this.addQuesBtn_Click);
             // 

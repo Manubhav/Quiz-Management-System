@@ -58,7 +58,7 @@
             this.label1.Name = "label1";
             this.label1.Size = new System.Drawing.Size(186, 32);
             this.label1.TabIndex = 2;
-            this.label1.Text = "Xoş Gəlmisiz!";
+            this.label1.Text = "Welcome!";
             // 
             // label2
             // 
@@ -70,7 +70,7 @@
             this.label2.Name = "label2";
             this.label2.Size = new System.Drawing.Size(98, 28);
             this.label2.TabIndex = 3;
-            this.label2.Text = "Daxil ol";
+            this.label2.Text = "Sign in";
             // 
             // label3
             // 
@@ -98,7 +98,7 @@
             this.label4.Name = "label4";
             this.label4.Size = new System.Drawing.Size(42, 21);
             this.label4.TabIndex = 7;
-            this.label4.Text = "Şifrə";
+            this.label4.Text = "Password";
             // 
             // PassLog
             // 
@@ -122,9 +122,30 @@
             this.button1.Name = "button1";
             this.button1.Size = new System.Drawing.Size(250, 33);
             this.button1.TabIndex = 9;
-            this.button1.Text = "Daxil ol";
+            this.button1.Text = "Sign in";
             this.button1.UseVisualStyleBackColor = false;
             this.button1.Click += new System.EventHandler(this.button1_Click);
+
+            this.button2 = new System.Windows.Forms.Button();
+            // 
+            // button2 (Go Back)
+            // 
+            this.button2.BackColor = System.Drawing.SystemColors.HotTrack;
+            this.button2.FlatAppearance.BorderColor = System.Drawing.Color.MediumSeaGreen;
+            this.button2.FlatAppearance.BorderSize = 0;
+            this.button2.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
+            this.button2.Font = new System.Drawing.Font("Arial Rounded MT Bold", 9.75F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point);
+            this.button2.ForeColor = System.Drawing.Color.White;
+            this.button2.Location = new System.Drawing.Point(567, 370); // Adjust position below Sign In button
+            this.button2.Name = "button2";
+            this.button2.Size = new System.Drawing.Size(250, 33);
+            this.button2.TabIndex = 10;
+            this.button2.Text = "Go Back";
+            this.button2.UseVisualStyleBackColor = false;
+            this.button2.Click += new System.EventHandler(this.button2_Click); // Event handler for the Go Back button
+            this.Controls.Add(this.button2);
+
+
             // 
             // StuLog
             // 
@@ -150,6 +171,13 @@
 
         }
 
+        private void button2_Click(object sender, EventArgs e)
+        {
+            // Close this form or navigate to the previous screen.
+            this.Close();
+        }
+
+
         #endregion
 
         private PictureBox pictureBox1;
@@ -159,6 +187,7 @@
         private Label label4;
         private TextBox PassLog;
         private Button button1;
+        private Button button2;
         public TextBox EmailLog;
     }
 }

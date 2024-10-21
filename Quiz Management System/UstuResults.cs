@@ -1,12 +1,11 @@
-﻿
+﻿using Firebase.Database;
+using Firebase.Database.Query;
+using FirebaseAdmin;
+using Google.Apis.Auth.OAuth2;
 using System;
-using System.Collections.Generic;
-using System.ComponentModel;
 using System.Data;
-using System.Data.SqlClient;
-using System.Drawing;
+using Quiz_Management_System.Models;
 using System.Linq;
-using System.Text;
 using System.Threading.Tasks;
 using System.Windows.Forms;
 
@@ -14,106 +13,112 @@ namespace Quiz_Management_System
 {
     public partial class UstuResults : UserControl
     {
-        SqlConnection con = new SqlConnection(@"Data Source=DESKTOP-M42063Q;Initial Catalog=Quiz_Management_System;Integrated Security=True");
+        private static FirebaseClient firebaseClient;
 
         public UstuResults()
         {
             InitializeComponent();
+            FirebaseInitializer.InitializeFirebase(); // Initialize Firebase
+            firebaseClient = new FirebaseClient("https://smart-learning-system-a2c86-default-rtdb.asia-southeast1.firebasedatabase.app");
         }
-        private void FilterCombo()
-        {
-            SqlCommand query = new SqlCommand("SELECT stu.Name, stu.Surname, g.Group_no, sub.Name Subject, ss.Score FROM SubjectStudent ss INNER JOIN Students stu ON ss.Student_id=stu.Id INNER JOIN Groups g ON stu.Group_id=g.Id INNER JOIN Subjects sub ON ss.Subject_id=sub.Id WHERE sub.Name LIKE '%" + comboBox1.Text + "'", con);
-            SqlDataAdapter dat2 = new SqlDataAdapter();
-            DataTable dtbl2 = new DataTable();
-            dat2.SelectCommand = query;
-            dtbl2.Clear();
-            dat2.Fill(dtbl2);
-            resultDGV.DataSource = dtbl2;
 
-        }
-        private void FilterComboGroup()
+        private async Task<DataTable> GetResultsAsync(string subject = null, string group = null)
         {
-            SqlCommand query = new SqlCommand("SELECT stu.Name, stu.Surname, g.Group_no, sub.Name Subject, ss.Score FROM SubjectStudent ss INNER JOIN Students stu ON ss.Student_id=stu.Id INNER JOIN Groups g ON stu.Group_id=g.Id INNER JOIN Subjects sub ON ss.Subject_id=sub.Id WHERE g.Group_no LIKE '%" + comboBox2.Text + "' AND sub.Name LIKE '%" + comboBox1.Text+ "'", con);
-            SqlDataAdapter dat4 = new SqlDataAdapter();
-            DataTable dtbl4 = new DataTable();
-            dat4.SelectCommand = query;
-            dtbl4.Clear();
-            dat4.Fill(dtbl4);
-            resultDGV.DataSource = dtbl4;
+            // Fetch results from Firebase
+            var scores = await firebaseClient
+                .Child("SubjectStudent") // Replace with your actual Firebase path
+                .OnceAsync<SubjectStudent>();
 
-        }
-        private SqlConnection GetSqlConnection()
-        {
-            return new SqlConnection(@"Data Source=DESKTOP-M42063Q;Initial Catalog=Quiz_Management_System;Integrated Security=True");
-        }
-        private void LoadData()
-        {
-            using (SqlConnection cn = GetSqlConnection())
+            var students = await firebaseClient
+                .Child("Students") // Replace with your actual Firebase path
+                .OnceAsync<Student>();
+
+            var groups = await firebaseClient
+                .Child("Groups") // Replace with your actual Firebase path
+                .OnceAsync<Group>();
+
+            var subjects = await firebaseClient
+                .Child("Subjects") // Replace with your actual Firebase path
+                .OnceAsync<Subject>();
+
+            DataTable dt = new DataTable();
+            dt.Columns.Add("Name");
+            dt.Columns.Add("Surname");
+            dt.Columns.Add("Group_no");
+            dt.Columns.Add("Subject");
+            dt.Columns.Add("Score");
+
+            // Loop through the data and filter if necessary
+            foreach (var score in scores)
             {
-                string query = "SELECT stu.Name, stu.Surname, g.Group_no, sub.Name Subject, ss.Score FROM SubjectStudent ss INNER JOIN Students stu ON ss.Student_id=stu.Id INNER JOIN Groups g ON stu.Group_id=g.Id INNER JOIN Subjects sub ON ss.Subject_id=sub.Id";
-                SqlDataAdapter adp = new SqlDataAdapter(query, cn);
-                DataTable dt = new DataTable();
-                adp.Fill(dt);
-                if (dt.Rows.Count > 0)
+                var student = students.FirstOrDefault(s => s.Key == score.Object.Student_id);
+                var groupObj = groups.FirstOrDefault(g => g.Key == student.Object.Group_id);
+                var subjectObj = subjects.FirstOrDefault(sub => sub.Key == score.Object.Subject_id);
+
+                if (student != null && groupObj != null && subjectObj != null)
                 {
-                    resultDGV.DataSource = dt;
+                    if ((subject == null || subjectObj.Object.Name.Contains(subject)) &&
+                        (group == null || groupObj.Object.Group_no.Contains(group)))
+                    {
+                        dt.Rows.Add(student.Object.Name, student.Object.Surname, groupObj.Object.Group_no, subjectObj.Object.Name, score.Object.Score);
+                    }
                 }
             }
+
+            return dt;
         }
-        private void ComboLoad()
+
+        private async Task LoadData()
         {
-            SqlConnection con = new SqlConnection(@"Data Source=DESKTOP-M42063Q;Initial Catalog=Quiz_Management_System;Integrated Security=True");
-            SqlCommand cmd;
+            DataTable dt = await GetResultsAsync();
+            resultDGV.DataSource = dt;
+        }
+
+        private async void FilterCombo()
+        {
+            string selectedSubject = comboBox1.Text;
+            DataTable dt = await GetResultsAsync(subject: selectedSubject);
+            resultDGV.DataSource = dt;
+        }
+
+        private async void FilterComboGroup()
+        {
+            string selectedGroup = comboBox2.Text;
+            string selectedSubject = comboBox1.Text;
+            DataTable dt = await GetResultsAsync(subject: selectedSubject, group: selectedGroup);
+            resultDGV.DataSource = dt;
+        }
+
+        private async Task ComboLoad()
+        {
             comboBox1.Items.Clear();
-            con.Open();
-            cmd = con.CreateCommand();
-            cmd.CommandType = CommandType.Text;
-            cmd.CommandText = "SELECT Name FROM Subjects";
-            cmd.ExecuteNonQuery();
-            DataTable dtbl = new DataTable();
-            SqlDataAdapter dta = new SqlDataAdapter(cmd);
-            dta.Fill(dtbl);
-
-
-            foreach (DataRow dr in dtbl.Rows)
+            var subjects = await firebaseClient.Child("Subjects").OnceAsync<Subject>();
+            foreach (var subject in subjects)
             {
-                comboBox1.Items.Add(dr["Name"].ToString());
-
+                comboBox1.Items.Add(subject.Object.Name);
             }
-            con.Close();
         }
-        private void ComboLoadGroup()
+
+        private async Task ComboLoadGroup()
         {
-            SqlConnection con = new SqlConnection(@"Data Source=DESKTOP-M42063Q;Initial Catalog=Quiz_Management_System;Integrated Security=True");
-            SqlCommand cmd;
             comboBox2.Items.Clear();
-            con.Open();
-            cmd = con.CreateCommand();
-            cmd.CommandType = CommandType.Text;
-            cmd.CommandText = "SELECT Group_no FROM Groups";
-            cmd.ExecuteNonQuery();
-            DataTable dtbl = new DataTable();
-            SqlDataAdapter dta = new SqlDataAdapter(cmd);
-            dta.Fill(dtbl);
-
-
-            foreach (DataRow dr in dtbl.Rows)
+            var groups = await firebaseClient.Child("Groups").OnceAsync<Group>();
+            foreach (var group in groups)
             {
-                comboBox2.Items.Add(dr["Group_no"].ToString());
-
+                comboBox2.Items.Add(group.Object.Group_no);
             }
-            con.Close();
         }
+
         private void button1_Click(object sender, EventArgs e)
         {
             FilterCombo();
         }
 
-        private void UstuResults_Load(object sender, EventArgs e)
+        private async void UstuResults_Load(object sender, EventArgs e)
         {
-            ComboLoad();
-            LoadData();
-            ComboLoadGroup();
+            await ComboLoad();
+            await LoadData();
+            await ComboLoadGroup();
         }
 
         private void button2_Click(object sender, EventArgs e)
@@ -126,4 +131,14 @@ namespace Quiz_Management_System
             LoadData();
         }
     }
+
+    // Model classes for Firebase Data (ensure these match your Firebase structure)
+    public class SubjectStudent
+    {
+        public string Student_id { get; set; }
+        public string Subject_id { get; set; }
+        public int Score { get; set; }
+    }
+
+    
 }

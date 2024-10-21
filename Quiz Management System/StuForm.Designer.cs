@@ -29,7 +29,7 @@
         private void InitializeComponent()
         {
             this.menuStrip1 = new System.Windows.Forms.MenuStrip();
-            this.mühazirələrToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.LectureToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.testToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.label1 = new System.Windows.Forms.Label();
             this.pictureBox1 = new System.Windows.Forms.PictureBox();
@@ -44,7 +44,7 @@
             this.menuStrip1.Font = new System.Drawing.Font("Arial Rounded MT Bold", 14.25F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point);
             this.menuStrip1.GripStyle = System.Windows.Forms.ToolStripGripStyle.Visible;
             this.menuStrip1.Items.AddRange(new System.Windows.Forms.ToolStripItem[] {
-            this.mühazirələrToolStripMenuItem,
+            this.LectureToolStripMenuItem,
             this.testToolStripMenuItem});
             this.menuStrip1.Location = new System.Drawing.Point(0, 0);
             this.menuStrip1.Name = "menuStrip1";
@@ -52,14 +52,14 @@
             this.menuStrip1.TabIndex = 0;
             this.menuStrip1.Text = "menuStrip1";
             // 
-            // mühazirələrToolStripMenuItem
+            // LectureToolStripMenuItem
             // 
-            this.mühazirələrToolStripMenuItem.BackColor = System.Drawing.Color.White;
-            this.mühazirələrToolStripMenuItem.ForeColor = System.Drawing.Color.DodgerBlue;
-            this.mühazirələrToolStripMenuItem.Name = "mühazirələrToolStripMenuItem";
-            this.mühazirələrToolStripMenuItem.Size = new System.Drawing.Size(125, 26);
-            this.mühazirələrToolStripMenuItem.Text = "Mühazirələr";
-            this.mühazirələrToolStripMenuItem.Click += new System.EventHandler(this.mühazirələrToolStripMenuItem_Click);
+            this.LectureToolStripMenuItem.BackColor = System.Drawing.Color.White;
+            this.LectureToolStripMenuItem.ForeColor = System.Drawing.Color.DodgerBlue;
+            this.LectureToolStripMenuItem.Name = "LectureToolStripMenuItem";
+            this.LectureToolStripMenuItem.Size = new System.Drawing.Size(125, 26);
+            this.LectureToolStripMenuItem.Text = "lectures";
+            this.LectureToolStripMenuItem.Click += new System.EventHandler(this.LectureToolStripMenuItem_Click);
             // 
             // testToolStripMenuItem
             // 
@@ -137,7 +137,7 @@
         #endregion
 
         private MenuStrip menuStrip1;
-        private ToolStripMenuItem mühazirələrToolStripMenuItem;
+        private ToolStripMenuItem LectureToolStripMenuItem;
         private ToolStripMenuItem testToolStripMenuItem;
         private Label label1;
         private PictureBox pictureBox1;
