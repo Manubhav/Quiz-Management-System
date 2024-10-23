@@ -50,15 +50,12 @@ namespace Quiz_Management_System
         {
             var selectedSubject = comboBox1.Text;
 
-            // Get the subject ID based on the selected name
-            int subjectId = subjectDictionary.FirstOrDefault(x => x.Value == selectedSubject).Key;
-
             // Filter logic to be implemented based on Firebase queries
             var filteredQuestions = firebaseClient
                 .Child("Questions")
                 .OnceAsync<Question>()
                 .Result
-                .Where(q => q.Object.Subject_id == subjectId);
+                .Where(q => q.Object.Subject_name == selectedSubject);
 
             // Create a DataTable to bind to the DataGridView
             DataTable dataTable = new DataTable();
@@ -80,8 +77,6 @@ namespace Quiz_Management_System
             updateDGV.DataSource = dataTable;
         }
 
-        private Dictionary<int, string> subjectDictionary = new Dictionary<int, string>();
-
         private void ComboLoad()
         {
             // Load subjects from Firebase
@@ -90,7 +85,6 @@ namespace Quiz_Management_System
 
             foreach (var subject in subjects)
             {
-                subjectDictionary[subject.Object.Id] = subject.Object.Name;
                 comboBox1.Items.Add(subject.Object.Name);
             }
         }

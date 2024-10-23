@@ -265,7 +265,7 @@
             // 
             // pictureBox2
             // 
-            pictureBox2.Image = Properties.Resources._1;
+            pictureBox2.Image = Properties.Resources.UTS_Logo;
             pictureBox2.Location = new Point(189, 84);
             pictureBox2.Margin = new Padding(3, 4, 3, 4);
             pictureBox2.Name = "pictureBox2";

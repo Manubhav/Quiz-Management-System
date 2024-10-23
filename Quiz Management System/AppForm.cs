@@ -11,89 +11,56 @@
         {
             Close();
         }
+
         private void AppForm_Load(object sender, EventArgs e)
         {
-            uC_AddNewQuestion1.Visible = false;
-            newSubject1.Visible = false;
-            udelete1.Visible = false;
-            uUpdate1.Visible = false;
-            uStuReg1.Visible = false;
-            ustuResults1.Visible = false;
-
-
+            HideAllControls();
         }
 
         private void button1_Click(object sender, EventArgs e)
         {
-            //contentPanel.Hide();
-            uC_AddNewQuestion1.Visible = true;
-            newSubject1.Visible = false;
-            udelete1.Visible = false;
-            uUpdate1.Visible = false;
-            uStuReg1.Visible = false;
-            ustuResults1.Visible = false;
-
-
-
+            ShowControl(uC_AddNewQuestion1);
         }
 
         private void button7_Click(object sender, EventArgs e)
         {
-            newSubject1.Visible = true;
-            uC_AddNewQuestion1.Visible = false;
-            udelete1.Visible = false;
-            uUpdate1.Visible = false;
-            uStuReg1.Visible = false;
-            ustuResults1.Visible = false;
-
-
+            ShowControl(newSubject1);
         }
 
         private void button2_Click(object sender, EventArgs e)
         {
-            uUpdate1.Visible = true;
-            newSubject1.Visible = false;
-            uC_AddNewQuestion1.Visible = false;
-            udelete1.Visible = false;
-            uStuReg1.Visible = false;
-            ustuResults1.Visible = false;
-
-
-
+            ShowControl(uUpdate1);
         }
 
         private void button3_Click(object sender, EventArgs e)
         {
-
-            udelete1.Visible = true;
-            uC_AddNewQuestion1.Visible = false;
-            newSubject1.Visible = false;
-            uUpdate1.Visible = false;
-            uStuReg1.Visible = false;
-            ustuResults1.Visible = false;
-
-
+            ShowControl(udelete1);
         }
 
         private void button4_Click(object sender, EventArgs e)
         {
-            uStuReg1.Visible = true;
-            udelete1.Visible = false;
-            uC_AddNewQuestion1.Visible = false;
-            newSubject1.Visible = false;
-            uUpdate1.Visible = false;
-            ustuResults1.Visible = false;
-
+            ShowControl(uStuReg1);
         }
 
         private void button5_Click(object sender, EventArgs e)
         {
-            ustuResults1.Visible = true;
-            uStuReg1.Visible = false;
-            udelete1.Visible = false;
+            ShowControl(ustuResults1);
+        }
+
+        private void HideAllControls()
+        {
             uC_AddNewQuestion1.Visible = false;
             newSubject1.Visible = false;
+            udelete1.Visible = false;
             uUpdate1.Visible = false;
+            uStuReg1.Visible = false;
+            ustuResults1.Visible = false;
+        }
+
+        private void ShowControl(Control controlToShow)
+        {
+            HideAllControls();
+            controlToShow.Visible = true;
         }
     }
 }

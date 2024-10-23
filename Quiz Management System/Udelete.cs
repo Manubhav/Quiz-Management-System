@@ -204,11 +204,4 @@ namespace Quiz_Management_System
             // Optional event handler for text changes in textBox1 (if needed)
         }
     }
-
-    // Model class for Subject
-    public class Subject
-    {
-        public int Id { get; set; }
-        public string Name { get; set; }
-    }
 }

@@ -31,6 +31,7 @@
             this.menuStrip1 = new System.Windows.Forms.MenuStrip();
             this.LectureToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.testToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.logoutToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.label1 = new System.Windows.Forms.Label();
             this.pictureBox1 = new System.Windows.Forms.PictureBox();
             this.uLecture1 = new Quiz_Management_System.uLecture();
@@ -44,8 +45,10 @@
             this.menuStrip1.Font = new System.Drawing.Font("Arial Rounded MT Bold", 14.25F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point);
             this.menuStrip1.GripStyle = System.Windows.Forms.ToolStripGripStyle.Visible;
             this.menuStrip1.Items.AddRange(new System.Windows.Forms.ToolStripItem[] {
-            this.LectureToolStripMenuItem,
-            this.testToolStripMenuItem});
+                this.LectureToolStripMenuItem,
+                this.testToolStripMenuItem,
+                this.logoutToolStripMenuItem 
+            });
             this.menuStrip1.Location = new System.Drawing.Point(0, 0);
             this.menuStrip1.Name = "menuStrip1";
             this.menuStrip1.Size = new System.Drawing.Size(800, 30);
@@ -69,6 +72,15 @@
             this.testToolStripMenuItem.Size = new System.Drawing.Size(62, 26);
             this.testToolStripMenuItem.Text = "Test";
             this.testToolStripMenuItem.Click += new System.EventHandler(this.testToolStripMenuItem_Click);
+            // 
+            // logoutToolStripMenuItem
+            // 
+            this.logoutToolStripMenuItem.BackColor = System.Drawing.Color.White;
+            this.logoutToolStripMenuItem.ForeColor = System.Drawing.Color.DodgerBlue;
+            this.logoutToolStripMenuItem.Name = "logoutToolStripMenuItem";
+            this.logoutToolStripMenuItem.Size = new System.Drawing.Size(73, 26);
+            this.logoutToolStripMenuItem.Text = "Logout";
+            this.logoutToolStripMenuItem.Click += new System.EventHandler(this.logoutToolStripMenuItem_Click);
             // 
             // label1
             // 
@@ -106,10 +118,7 @@
             this.uQuiz1.Location = new System.Drawing.Point(0, 33);
             this.uQuiz1.Name = "uQuiz1";
             this.uQuiz1.Size = new System.Drawing.Size(800, 417);
-           
             this.uQuiz1.TabIndex = 4;
-            this.uQuiz1.Visible = false;
-            this.uQuiz1.Load += new System.EventHandler(this.uQuiz1_Load);
             // 
             // StuForm
             // 
@@ -125,7 +134,6 @@
             this.Name = "StuForm";
             this.StartPosition = System.Windows.Forms.FormStartPosition.CenterScreen;
             this.Text = "StuForm";
-            this.Load += new System.EventHandler(this.StuForm_Load);
             this.menuStrip1.ResumeLayout(false);
             this.menuStrip1.PerformLayout();
             ((System.ComponentModel.ISupportInitialize)(this.pictureBox1)).EndInit();
@@ -139,6 +147,7 @@
         private MenuStrip menuStrip1;
         private ToolStripMenuItem LectureToolStripMenuItem;
         private ToolStripMenuItem testToolStripMenuItem;
+        private ToolStripMenuItem logoutToolStripMenuItem;
         private Label label1;
         private PictureBox pictureBox1;
         private uLecture uLecture1;

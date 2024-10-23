@@ -10,13 +10,12 @@ namespace Quiz_Management_System
 {
     public partial class StuLog : Form
     {
-        private static FirebaseClient firebaseClient;
+        private static readonly FirebaseClient firebaseClient = new FirebaseClient("https://smart-learning-system-a2c86-default-rtdb.asia-southeast1.firebasedatabase.app");
 
         public StuLog()
         {
             InitializeComponent();
             FirebaseInitializer.InitializeFirebase(); // Initialize Firebase
-            firebaseClient = new FirebaseClient("https://smart-learning-system-a2c86-default-rtdb.asia-southeast1.firebasedatabase.app");
         }
 
         private async void button1_Click(object sender, EventArgs e)
@@ -26,43 +25,45 @@ namespace Quiz_Management_System
 
             if (!Authenticate())
             {
-                MessageBox.Show("Don't keep any textbox blank!");
+                ShowMessage("Don't keep any textbox blank!");
                 return;
             }
 
-            // Check if the user exists
-            var students = await firebaseClient
-                .Child("Students")
-                .OrderByKey()
-                .OnceAsync<Student>();
-
-            var student = students.FirstOrDefault(s => s.Object.Email == EmailLog.Text);
-
+            var student = await GetStudentByEmail(EmailLog.Text);
             if (student == null)
             {
-                MessageBox.Show("User does not exist!");
+                ShowMessage("User does not exist!");
                 return;
             }
 
-            if (student.Object.Password != PassLog.Text)
+            if (!IsPasswordValid(student.Password, PassLog.Text))
             {
-                MessageBox.Show("Invalid password!");
+                ShowMessage("Invalid password!");
                 return;
             }
 
             // Proceed to next form
             Hide();
-            StuForm StuApp = new StuForm();
-            StuApp.ShowDialog();
+            using (var stuApp = new StuForm())
+            {
+                stuApp.ShowDialog();
+            }
             Close();
         }
 
-        private bool Authenticate()
-        {
-            if (string.IsNullOrWhiteSpace(EmailLog.Text) || string.IsNullOrWhiteSpace(PassLog.Text))
-                return false;
+        private bool Authenticate() =>
+            !string.IsNullOrWhiteSpace(EmailLog.Text) && !string.IsNullOrWhiteSpace(PassLog.Text);
 
-            return true;
+        private async Task<Student> GetStudentByEmail(string email)
+        {
+            var students = await firebaseClient.Child("Students").OrderByKey().OnceAsync<Student>();
+            return students.FirstOrDefault(s => s.Object.Email == email)?.Object;
         }
+
+        private bool IsPasswordValid(string storedPassword, string enteredPassword) =>
+            storedPassword == enteredPassword;
+
+        private void ShowMessage(string message) =>
+            MessageBox.Show(message);
     }
 }

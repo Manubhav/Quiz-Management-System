@@ -12,7 +12,6 @@ namespace Quiz_Management_System
 {
     public partial class NewSubject : UserControl
     {
-        // Initialize Firebase client
         private readonly FirebaseClient firebaseClient;
 
         public NewSubject()
@@ -22,159 +21,156 @@ namespace Quiz_Management_System
             firebaseClient = new FirebaseClient("https://smart-learning-system-a2c86-default-rtdb.asia-southeast1.firebasedatabase.app");
         }
 
-        // Adding a new subject to Firebase
         private async void addSubBtn_Click(object sender, EventArgs e)
         {
             if (!Authenticate())
             {
-                MessageBox.Show("Don't keep any textbox blank!");
+                ShowMessage("Don't keep any textbox blank!");
                 return;
             }
 
-            // Add new subject to Firebase
+            await AddSubjectToFirebase(addnewsubtxt.Text);
+            ShowMessage("Subject added successfully");
+        }
+
+        private bool Authenticate() =>
+            !string.IsNullOrWhiteSpace(addnewsubtxt.Text);
+
+        private async Task AddSubjectToFirebase(string subjectName)
+        {
             await firebaseClient
                 .Child("Subjects")
-                .PostAsync(new { Name = addnewsubtxt.Text });
-            MessageBox.Show("Subject added successfully");
+                .PostAsync(new { Name = subjectName });
         }
 
-        // Validate if subject textbox is not empty
-        bool Authenticate()
-        {
-            return !string.IsNullOrWhiteSpace(addnewsubtxt.Text);
-        }
-
-        // Open a file using OpenFileDialog
         private void button1_Click(object sender, EventArgs e)
         {
-            OpenFileDialog dlg = new OpenFileDialog();
-            dlg.ShowDialog();
-            filePath.Text = dlg.FileName;
-        }
-
-        // Save the file to Firebase
-        private async void button2_Click(object sender, EventArgs e)
-        {
-            await SaveFile(filePath.Text);
-            MessageBox.Show("File saved successfully");
-        }
-
-        // Method to save a file (as a byte array in Firebase)
-        private async Task SaveFile(string filePath)
-        {
-            using (Stream stream = File.OpenRead(filePath))
+            using (OpenFileDialog dlg = new OpenFileDialog())
             {
-                byte[] buffer = new byte[stream.Length];
-                stream.Read(buffer, 0, buffer.Length);
-
-                var fi = new FileInfo(filePath);
-                string extn = fi.Extension;
-                string name = fi.Name;
-
-                // Store file as Base64 string in Firebase
-                await firebaseClient
-                    .Child("Lectures")
-                    .PostAsync(new
-                    {
-                        Data = Convert.ToBase64String(buffer),
-                        Extension = extn,
-                        FileName = name,
-                        Subject_name = SafeSubjectName(subLec.Text)
-                    });
+                if (dlg.ShowDialog() == DialogResult.OK)
+                {
+                    filePath.Text = dlg.FileName;
+                }
             }
         }
 
-        private string SafeSubjectName(string subjectName)
+        private async void button2_Click(object sender, EventArgs e)
         {
-            return subjectName.Replace(".", "dot").Replace("+", "plus");
+            await SaveFile(filePath.Text);
+            ShowMessage("File saved successfully");
         }
 
-        // Load subjects and lectures from Firebase on form load
+        private async Task SaveFile(string filePath)
+        {
+            if (string.IsNullOrWhiteSpace(filePath))
+            {
+                ShowMessage("File path cannot be empty!");
+                return;
+            }
+
+            using (Stream stream = File.OpenRead(filePath))
+            {
+                byte[] buffer = new byte[stream.Length];
+                await stream.ReadAsync(buffer, 0, buffer.Length);
+
+                var fi = new FileInfo(filePath);
+                await SaveFileToFirebase(buffer, fi.Extension, fi.Name);
+            }
+        }
+
+        private async Task SaveFileToFirebase(byte[] buffer, string extn, string name)
+        {
+            await firebaseClient
+                .Child("Lectures")
+                .PostAsync(new
+                {
+                    Data = Convert.ToBase64String(buffer),
+                    Extension = extn,
+                    FileName = name,
+                    Subject_name = SafeSubjectName(subLec.Text)
+                });
+        }
+
+        private string SafeSubjectName(string subjectName) =>
+            subjectName.Replace(".", "dot").Replace("+", "plus");
+
         private async void NewSubject_Load(object sender, EventArgs e)
         {
             await LoadData();
         }
 
-        // Method to load data from Firebase (subjects and lectures)
         private async Task LoadData()
         {
-            // Load subjects
-            var subjects = (await firebaseClient
-                .Child("Subjects")
-                .OnceAsync<dynamic>())
-                .Select(item => new
-                {
-                    Id = item.Key,
-                    Name = item.Object.Name
-                })
-                .ToList();
-
-            if (subjects.Any())
-            {
-                dgvSub.DataSource = subjects;
-            }
-
-            // Load lectures
-            var lectures = (await firebaseClient
-                .Child("Lectures")
-                .OnceAsync<dynamic>())
-                .Select(item => new
-                {
-                    Id = item.Key,
-                    FileName = item.Object.FileName,
-                    Extension = item.Object.Extension,
-                    Subject_id = item.Object.Subject_id
-                })
-                .ToList();
-
-            if (lectures.Any())
-            {
-                dgvDocuments.DataSource = lectures;
-            }
+            dgvSub.DataSource = await LoadSubjects();
+            dgvDocuments.DataSource = await LoadLectures();
         }
 
-        // Open file for the selected row in dgvDocuments
+        private async Task<object> LoadSubjects()
+        {
+            var subjects = await firebaseClient
+                .Child("Subjects")
+                .OnceAsync<dynamic>();
+
+            return subjects.Select(item => new
+            {
+                Id = item.Key,
+                Name = item.Object.Name
+            }).ToList();
+        }
+
+        private async Task<object> LoadLectures()
+        {
+            var lectures = await firebaseClient
+                .Child("Lectures")
+                .OnceAsync<dynamic>();
+
+            return lectures.Select(item => new
+            {
+                Id = item.Key,
+                FileName = item.Object.FileName,
+                Extension = item.Object.Extension,
+                Subject_id = item.Object.Subject_id
+            }).ToList();
+        }
+
         private async void button3_Click(object sender, EventArgs e)
         {
-            var selectedRow = dgvDocuments.SelectedRows;
-            foreach (var row in selectedRow)
+            foreach (DataGridViewRow selectedRow in dgvDocuments.SelectedRows)
             {
-                string id = ((DataGridViewRow)row).Cells[0].Value.ToString();
+                string id = selectedRow.Cells[0].Value.ToString();
                 await OpenFile(id);
             }
         }
 
-        // Method to retrieve and open a file from Firebase
         private async Task OpenFile(string id)
         {
-            // Get file data from Firebase
             var lecture = await firebaseClient
                 .Child("Lectures")
                 .Child(id)
                 .OnceSingleAsync<dynamic>();
 
-            var name = lecture.FileName.ToString();
             var data = Convert.FromBase64String(lecture.Data.ToString());
-            var extn = lecture.Extension.ToString();
+            string newFileName = GenerateFileName(lecture.FileName, lecture.Extension);
 
-            var newFileName = name.Replace(extn, DateTime.Now.ToString("ddMMyyyyhhmmss")) + extn;
             File.WriteAllBytes(newFileName, data);
-
-            // Open the saved file
             Process.Start(new ProcessStartInfo { FileName = newFileName, UseShellExecute = true });
         }
 
-        // Reload subjects and lectures data
+        private string GenerateFileName(string name, string extn) =>
+            $"{name.Replace(extn, DateTime.Now.ToString("ddMMyyyyhhmmss"))}{extn}";
+
         private async void button4_Click(object sender, EventArgs e)
         {
             await LoadData();
         }
 
-        // Reload data on button5 click
         private async void button5_Click(object sender, EventArgs e)
         {
             await LoadData();
         }
+
+        private void ShowMessage(string message) =>
+            MessageBox.Show(message);
 
         private void dgvDocuments_CellContentClick(object sender, DataGridViewCellEventArgs e)
         {

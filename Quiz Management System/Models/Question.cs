@@ -1,10 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-
-namespace Quiz_Management_System.Models
+﻿namespace Quiz_Management_System.Models
 {
     public class Question
     {
@@ -16,6 +10,6 @@ namespace Quiz_Management_System.Models
         public string Answer3 { get; set; }
         public string Answer4 { get; set; }
         public string CorrectAnswer { get; set; }
-        public int Subject_id { get; set; }
+        public string Subject_name { get; set; }
     }
 }

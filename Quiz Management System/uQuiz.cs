@@ -1,25 +1,15 @@
 ﻿using Firebase.Database;
 using Firebase.Database.Query;
-using System;
-using System.Collections.Generic;
-using System.Data;
-using System.Linq;
-using System.Threading.Tasks;
-using System.Windows.Forms;
 using Quiz_Management_System.Models;
+using System.Diagnostics;
 
 namespace Quiz_Management_System
 {
     public partial class uQuiz : UserControl
     {
         private readonly FirebaseClient firebaseClient;
-        int i = 0, point = 0, questionCount = 0;
-        List<string> answers;
-        List<string> variantA;
-        List<string> variantB;
-        List<string> variantC;
-        List<string> variantD;
-        List<string> content;
+        private int currentQuestionIndex = 0, score = 0;
+        private List<Question> questions;
 
         public uQuiz()
         {
@@ -28,46 +18,27 @@ namespace Quiz_Management_System
             firebaseClient = new FirebaseClient("https://smart-learning-system-a2c86-default-rtdb.asia-southeast1.firebasedatabase.app");
         }
 
-        private async void ComboLoad()
-        {
-            comboBox1.Items.Clear();
-
-            var subjects = (await firebaseClient
-                .Child("Subjects")
-                .OnceAsync<dynamic>())
-                .Select(item => new
-                {
-                    Name = item.Object.Name,
-                    Id = item.Key
-                })
-                .ToList();
-
-            comboBox1.DataSource = subjects;
-            comboBox1.DisplayMember = "Name";
-            comboBox1.ValueMember = "Id";
-        }
-
-        private void uQuiz_Load(object sender, EventArgs e)
+        private async void uQuiz_Load(object sender, EventArgs e)
         {
             lblEmail.Text = Properties.Settings.Default.studentEmail;
-            loadSubjects();
+            await LoadSubjectsAsync();
         }
 
-        private async void loadSubjects()
+        private async Task LoadSubjectsAsync()
         {
             try
             {
-                var subjects = (await firebaseClient
+                var subjects = await firebaseClient
                     .Child("Subjects")
-                    .OnceAsync<dynamic>())
+                    .OnceAsync<dynamic>();
+
+                comboBox1.DataSource = subjects
                     .Select(item => new
                     {
                         Name = item.Object.Name,
                         Id = item.Key
                     })
                     .ToList();
-
-                comboBox1.DataSource = subjects;
                 comboBox1.DisplayMember = "Name";
                 comboBox1.ValueMember = "Id";
             }
@@ -77,111 +48,105 @@ namespace Quiz_Management_System
             }
         }
 
-        private async Task RandomData()
+        private async Task LoadQuestionsAsync()
         {
-            answers = new List<string>();
-            variantA = new List<string>();
-            variantB = new List<string>();
-            variantC = new List<string>();
-            variantD = new List<string>();
-            content = new List<string>();
-
-            var questions = (await firebaseClient
+            questions = (await firebaseClient
                 .Child("Questions")
-                .OrderBy("Subject_id")
-                .EqualTo(comboBox1.SelectedValue.ToString())
-                .OnceAsync<dynamic>())
-                .Select(item => new
-                {
-                    Content = item.Object.Content,
-                    Answer1 = item.Object.Answer1,
-                    Answer2 = item.Object.Answer2,
-                    Answer3 = item.Object.Answer3,
-                    Answer4 = item.Object.Answer4,
-                    CorrectAnswer = item.Object.CorrectAnswer
-                })
+                .OrderBy("Subject_name")
+                .EqualTo(comboBox1.Text)
+                .OnceAsync<Question>())
+                .Select(item => item.Object)
                 .ToList();
 
-            foreach (var question in questions)
+            if (questions.Count > 0)
             {
-                content.Add(question.Content);
-                variantA.Add(question.Answer1);
-                variantB.Add(question.Answer2);
-                variantC.Add(question.Answer3);
-                variantD.Add(question.Answer4);
-                answers.Add(question.CorrectAnswer);
+                DisplayQuestion();
             }
+        }
 
-            questionCount = questions.Count;
+        private void DisplayQuestion()
+        {
+            var question = questions[currentQuestionIndex];
+            textBox2.Text = question.Content;
+            radioButton1.Text = question.Answer1;
+            radioButton2.Text = question.Answer2;
+            radioButton3.Text = question.Answer3;
+            radioButton4.Text = question.Answer4;
 
-            if (questionCount > 0)
-            {
-                textBox2.Text = content[i];
-                radioButton1.Text = variantA[i];
-                radioButton2.Text = variantB[i];
-                radioButton3.Text = variantC[i];
-                radioButton4.Text = variantD[i];
-            }
+            // Set the button text when displaying the question
+            button2.Text = (currentQuestionIndex == questions.Count - 1) ? "Finish" : "Next";
         }
 
         private async void button1_Click(object sender, EventArgs e)
         {
-            await RandomData();
+            await LoadQuestionsAsync();
         }
 
         private async void button2_Click(object sender, EventArgs e)
         {
-        A:
-            if (i < questionCount)
+            if (currentQuestionIndex < questions.Count)
             {
-                if (radioButton1.Checked && answers[i] == radioButton1.Text)
+                // Check if the selected answer is correct and update the score
+                var selectedAnswer = GetSelectedAnswer();
+                if (selectedAnswer == questions[currentQuestionIndex].CorrectAnswer)
                 {
-                    point++;
-                }
-                else if (radioButton2.Checked && answers[i] == radioButton2.Text)
-                {
-                    point++;
-                }
-                else if (radioButton3.Checked && answers[i] == radioButton3.Text)
-                {
-                    point++;
-                }
-                else if (radioButton4.Checked && answers[i] == radioButton4.Text)
-                {
-                    point++;
+                    score++;
                 }
 
-                lblPoint.Text = "Score : " + point;
-                i++;
+                lblPoint.Text = $"Score: {score}"; // Use string interpolation for readability
 
-                if (i == questionCount)
-                    goto A;
+                // Move to the next question
+                currentQuestionIndex++;
 
-                textBox2.Text = content[i];
-                radioButton1.Text = variantA[i];
-                radioButton2.Text = variantB[i];
-                radioButton3.Text = variantC[i];
-                radioButton4.Text = variantD[i];
+                // Check if there are more questions
+                if (currentQuestionIndex < questions.Count)
+                {
+                    DisplayQuestion();
+                }
+                else
+                {
+                    await FinishQuizAsync();
+                }
             }
-            else
-            {
-                MessageBox.Show($"Quiz finished. Your score: {point}");
+        }
 
-                // Save the score in Firebase
-                await firebaseClient        
-                    .Child("SubjectStudent")
-                    .PostAsync(new
-                    {
-                        Student_id = (await firebaseClient
-                            .Child("Students")
-                            .OrderBy("Email")
-                            .EqualTo(lblEmail.Text)
-                            .OnceAsync<dynamic>())
-                            .FirstOrDefault()?.Key,
-                        Subject_id = comboBox1.SelectedValue.ToString(),
-                        Score = point
-                    });
-            }
+
+        private string GetSelectedAnswer()
+        {
+            if (radioButton1.Checked) return radioButton1.Text;
+            if (radioButton2.Checked) return radioButton2.Text;
+            if (radioButton3.Checked) return radioButton3.Text;
+            if (radioButton4.Checked) return radioButton4.Text;
+            return null;
+        }
+
+        private async Task FinishQuizAsync()
+        {
+            MessageBox.Show($"Quiz finished. Your score: {score}");
+
+            // Save the score in Firebase
+            var studentId = (await firebaseClient
+                .Child("Students")
+                .OrderBy("Email")
+                .EqualTo(lblEmail.Text)
+                .OnceAsync<dynamic>())
+                .FirstOrDefault()?.Key;
+
+            await firebaseClient
+                .Child("SubjectStudent")
+                .PostAsync(new
+                {
+                    Student_id = studentId,
+                    Subject_name = comboBox1.Text,
+                    Score = score
+                });
+
+            NavigateBack();
+        }
+
+        private void NavigateBack()
+        {
+            this.Visible = false;
         }
     }
 }

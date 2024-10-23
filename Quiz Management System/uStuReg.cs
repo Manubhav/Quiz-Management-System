@@ -1,13 +1,7 @@
 ﻿using Firebase.Database;
-using Firebase.Database.Query;
-using FirebaseAdmin;
-using Google.Apis.Auth.OAuth2;
-using System;
 using System.Data;
-using System.Linq;
-using System.Threading.Tasks;
-using System.Windows.Forms;
-using Quiz_Management_System.Models; // Ensure you're referencing the correct namespace
+using Quiz_Management_System.Models;
+using Firebase.Database.Query;
 
 namespace Quiz_Management_System
 {
@@ -24,7 +18,7 @@ namespace Quiz_Management_System
 
         private async void button1_Click(object sender, EventArgs e)
         {
-            if (!Authenticate())
+            if (string.IsNullOrWhiteSpace(textBox1.Text) || string.IsNullOrWhiteSpace(textBox2.Text))
             {
                 MessageBox.Show("Don't keep any textbox blank!");
                 return;
@@ -36,82 +30,76 @@ namespace Quiz_Management_System
                 Specialty = textBox2.Text
             };
 
-            // Save to Firebase
-            await firebaseClient
-                .Child("Groups")
-                .PostAsync(group);
-
+            await firebaseClient.Child("Groups").PostAsync(group);
             MessageBox.Show("Group registration successful!");
         }
 
-        bool Authenticate()
+        private async Task LoadData<T>(string childName, DataGridView dgv, Func<T, Task<string[]>> rowMapper) where T : class
         {
-            return !(string.IsNullOrWhiteSpace(textBox1.Text) || string.IsNullOrWhiteSpace(textBox2.Text));
-        }
+            var items = await firebaseClient.Child(childName).OnceAsync<T>();
+            var dt = new DataTable();
 
-        private async Task LoadData()
-        {
-            var groups = await firebaseClient
-                .Child("Groups")
-                .OnceAsync<Group>();
-
-            DataTable dt = new DataTable();
-            dt.Columns.Add("Group_no");
-            dt.Columns.Add("Specialty");
-
-            foreach (var group in groups)
+            // Check if there are any items to load
+            if (!items.Any())
             {
-                dt.Rows.Add(group.Object.Group_no, group.Object.Specialty);
+                dgv.DataSource = null;
+                return;
             }
 
-            groupsDGV.DataSource = dt;
-        }
-
-        private async Task LoadDataStu()
-        {
-            var students = await firebaseClient
-                .Child("Students")
-                .OnceAsync<Student>();
-
-            var groups = await firebaseClient
-                .Child("Groups")
-                .OnceAsync<Group>();
-
-            DataTable dt = new DataTable();
-            dt.Columns.Add("Group_no");
-            dt.Columns.Add("Name");
-            dt.Columns.Add("Surname");
-            dt.Columns.Add("Age");
-            dt.Columns.Add("Email");
-            dt.Columns.Add("Password");
-            dt.Columns.Add("Specialty");
-
-            foreach (var student in students)
+            // Use the first item to infer columns dynamically
+            var firstItem = items.FirstOrDefault()?.Object;
+            if (firstItem != null)
             {
-                var group = groups.FirstOrDefault(g => g.Key == student.Object.Group_id);
-                dt.Rows.Add(
-                    group != null ? group.Object.Group_no : "",
-                    student.Object.Name,
-                    student.Object.Surname,
-                    student.Object.Age,
-                    student.Object.Email,
-                    student.Object.Password,
-                    group != null ? group.Object.Specialty : ""
-                );
+                var sampleRow = await rowMapper(firstItem);
+
+                // Generate columns based on the first row of data
+                foreach (var property in sampleRow)
+                {
+                    dt.Columns.Add(property);
+                }
+            }
+            else
+            {
+                throw new InvalidOperationException("No data available to generate columns.");
             }
 
-            newstuDGV.DataSource = dt;
+            // Add rows to the DataTable
+            foreach (var item in items)
+            {
+                if (item.Object != null)
+                {
+                    dt.Rows.Add(await rowMapper(item.Object));
+                }
+            }
+
+            dgv.DataSource = dt;
         }
+
+
 
         private async void button2_Click(object sender, EventArgs e)
         {
-            await LoadData();
+            await LoadData<Group>("Groups", groupsDGV, async g => new[] { g.Group_no, g.Specialty });
         }
 
         private async void uStuReg_Load(object sender, EventArgs e)
         {
-            await LoadData();
-            await LoadDataStu();
+            await LoadData<Group>("Groups", groupsDGV, async g => new[] { g.Group_no, g.Specialty });
+            await LoadData<Student>("Students", newstuDGV, async s => new[]
+            {
+                await GetGroupNo(s.Group_id),
+                s.Name,
+                s.Surname,
+                s.Age.ToString(),
+                s.Email,
+                s.Password
+            });
+        }
+
+        private async Task<string> GetGroupNo(string groupId)
+        {
+            var groups = await firebaseClient.Child("Groups").OnceAsync<Group>();
+            return groups.FirstOrDefault(g => g.Key == groupId)?.Object.Group_no ?? "";
         }
 
         private async void button3_Click(object sender, EventArgs e)
@@ -121,32 +109,26 @@ namespace Quiz_Management_System
                 Group_id = textBox3.Text,
                 Name = textBox4.Text,
                 Surname = textBox5.Text,
-                Age = int.Parse(textBox6.Text), // Ensure proper type conversion
+                Age = int.Parse(textBox6.Text),
                 Email = textBox7.Text,
                 Password = textBox8.Text
             };
 
-            // Save to Firebase
-            await firebaseClient
-                .Child("Students")
-                .PostAsync(student);
-
+            await firebaseClient.Child("Students").PostAsync(student);
             MessageBox.Show("Student registration successful!");
         }
 
         private async void button4_Click(object sender, EventArgs e)
         {
-            await LoadDataStu();
+            await LoadData<Student>("Students", newstuDGV, async s => new[]
+            {
+                await GetGroupNo(s.Group_id),
+                s.Name,
+                s.Surname,
+                s.Age.ToString(),
+                s.Email,
+                s.Password
+            });
         }
-    }
-
-    public class Student
-    {
-        public string Group_id { get; set; }
-        public string Name { get; set; }
-        public string Surname { get; set; }
-        public int Age { get; set; }
-        public string Email { get; set; }
-        public string Password { get; set; }
     }
 }

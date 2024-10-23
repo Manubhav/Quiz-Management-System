@@ -1,49 +1,41 @@
-﻿using System;
-using System.Collections.Generic;
-using System.ComponentModel;
-using System.Data;
-using System.Drawing;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using System.Windows.Forms;
-
-namespace Quiz_Management_System
+﻿namespace Quiz_Management_System
 {
     public partial class StuForm : Form
     {
-       
         public StuForm()
         {
             InitializeComponent();
         }
 
-        private void toolStripContainer1_ContentPanel_Load(object sender, EventArgs e)
-        {
-
-        }
-
         private void LectureToolStripMenuItem_Click(object sender, EventArgs e)
         {
-            uLecture1.Visible = true;
-            uQuiz1.Visible = false;
+            ShowControl(uLecture1);
         }
 
         private void testToolStripMenuItem_Click(object sender, EventArgs e)
         {
-            uQuiz1.Visible = true;
+            ShowControl(uQuiz1);
+        }
+
+        private void ShowControl(Control controlToShow)
+        {
+            // Hide both controls first
             uLecture1.Visible = false;
-            
+            uQuiz1.Visible = false;
+
+            // Show the specified control
+            controlToShow.Visible = true;
         }
 
-        private void StuForm_Load(object sender, EventArgs e)
-        {
-            
-        }
-
-        private void uQuiz1_Load(object sender, EventArgs e)
+        private void logoutToolStripMenuItem_Click(object sender, EventArgs e)
         {
 
+            DialogResult result = MessageBox.Show("Are you sure you want to logout?", "Logout", MessageBoxButtons.YesNo);
+            if (result == DialogResult.Yes)
+            {
+                // Close the current form or navigate back to the login screen
+                this.Close(); // This closes the current form.
+            }
         }
     }
 }

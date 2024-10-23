@@ -28,6 +28,7 @@
         /// </summary>
         private void InitializeComponent()
         {
+            backButton = new Button();
             pictureBox1 = new PictureBox();
             label1 = new Label();
             label2 = new Label();
@@ -40,6 +41,24 @@
             linkLabel1 = new LinkLabel();
             ((System.ComponentModel.ISupportInitialize)pictureBox1).BeginInit();
             SuspendLayout();
+            // 
+            // backButton
+            // 
+            backButton.BackColor = Color.MediumSeaGreen;
+            backButton.FlatAppearance.BorderColor = Color.MediumSeaGreen;
+            backButton.FlatAppearance.BorderSize = 0;
+            backButton.FlatAppearance.MouseDownBackColor = Color.LightSalmon;
+            backButton.FlatStyle = FlatStyle.Flat;
+            backButton.Font = new Font("Arial Rounded MT Bold", 9.75F, FontStyle.Regular, GraphicsUnit.Point);
+            backButton.ForeColor = Color.White;
+            backButton.Location = new Point(631, 450);
+            backButton.Margin = new Padding(3, 4, 3, 4);
+            backButton.Name = "backButton";
+            backButton.Size = new Size(286, 44);
+            backButton.TabIndex = 10;
+            backButton.Text = "Back";
+            backButton.UseVisualStyleBackColor = false;
+            backButton.Click += backButton_Click;
             // 
             // pictureBox1
             // 
@@ -135,7 +154,7 @@
             // 
             label5.AutoSize = true;
             label5.Font = new Font("Microsoft Sans Serif", 9.75F, FontStyle.Underline, GraphicsUnit.Point);
-            label5.Location = new Point(657, 491);
+            label5.Location = new Point(648, 498);
             label5.Name = "label5";
             label5.Size = new Size(185, 20);
             label5.TabIndex = 8;
@@ -145,7 +164,7 @@
             // 
             linkLabel1.AutoSize = true;
             linkLabel1.Font = new Font("Microsoft Sans Serif", 9F, FontStyle.Regular, GraphicsUnit.Point);
-            linkLabel1.Location = new Point(839, 493);
+            linkLabel1.Location = new Point(839, 498);
             linkLabel1.Name = "linkLabel1";
             linkLabel1.Size = new Size(63, 18);
             linkLabel1.TabIndex = 9;
@@ -169,6 +188,7 @@
             Controls.Add(label2);
             Controls.Add(label1);
             Controls.Add(pictureBox1);
+            Controls.Add(backButton);
             FormBorderStyle = FormBorderStyle.None;
             Margin = new Padding(3, 4, 3, 4);
             Name = "Form2";
@@ -191,5 +211,6 @@
         private Button button1;
         private Label label5;
         private LinkLabel linkLabel1;
+        private Button backButton;
     }
 }

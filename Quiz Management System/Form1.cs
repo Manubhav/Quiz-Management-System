@@ -9,20 +9,25 @@ namespace Quiz_Management_System
 
         private void button1_Click(object sender, EventArgs e)
         {
-            Form2 form2 = new Form2();
-            form2.ShowDialog();
+            OpenForm<Form2>();
         }
 
         private void button2_Click(object sender, EventArgs e)
         {
-            StuLog stulog = new StuLog();
-            stulog.ShowDialog();
-
+            OpenForm<StuLog>();
         }
 
         private void Form1_Load(object sender, EventArgs e)
         {
+            // Initialization code can go here if needed.
+        }
 
+        private void OpenForm<T>() where T : Form, new()
+        {
+            using (T form = new T())
+            {
+                form.ShowDialog();
+            }
         }
     }
 }

@@ -30,7 +30,7 @@ namespace Quiz_Management_System.Teacher_UC
                 .Child("Questions")
                 .PostAsync(new
                 {
-                    Subject_id = comboBox1.SelectedIndex + 1,
+                    Subject_name = comboBox1.Text,
                     Content = questionContent.Text,
                     Answer1 = answerA.Text,
                     Answer2 = answerB.Text,

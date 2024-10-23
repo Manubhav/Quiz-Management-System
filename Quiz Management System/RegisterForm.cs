@@ -1,64 +1,66 @@
 ﻿using Firebase.Database;
-using Firebase.Database.Query;
-using FirebaseAdmin;
-using Google.Apis.Auth.OAuth2;
 using System;
-using System.Linq;
 using System.Threading.Tasks;
 using System.Windows.Forms;
 using Quiz_Management_System.Models;
+using Firebase.Database.Query;
 
 namespace Quiz_Management_System
 {
     public partial class RegisterForm : Form
     {
-        private static FirebaseClient firebaseClient;
+        private static readonly FirebaseClient firebaseClient;
+
+        static RegisterForm()
+        {
+            FirebaseInitializer.InitializeFirebase(); // Initialize Firebase
+            firebaseClient = new FirebaseClient("https://smart-learning-system-a2c86-default-rtdb.asia-southeast1.firebasedatabase.app");
+        }
 
         public RegisterForm()
         {
             InitializeComponent();
-            FirebaseInitializer.InitializeFirebase(); // Initialize Firebase
-            firebaseClient = new FirebaseClient("https://smart-learning-system-a2c86-default-rtdb.asia-southeast1.firebasedatabase.app");
         }
 
         private async void RegBtn_Click(object sender, EventArgs e)
         {
             if (!Authenticate())
             {
-                MessageBox.Show("Don't keep any textbox blank!");
+                ShowMessage("Don't keep any textbox blank!");
                 return;
             }
 
-            // Create a new teacher object
-            var teacher = new Teacher
-            {
-                Name = NameTxt.Text,
-                Surname = SurnameTxt.Text,
-                Number = NumTxt.Text,
-                Email = EmailTxt.Text,
-                Password = PassTxt.Text
-            };
+            var teacher = CreateTeacherFromInput();
+            await SaveTeacherToFirebase(teacher);
 
-            // Save to Firebase
-            await firebaseClient
-                .Child("Teachers")
-                .PostAsync(teacher);
-
-            MessageBox.Show("Registration successful!");
+            ShowMessage("Registration successful!");
             Close(); // Optionally close the registration form
         }
 
-        private bool Authenticate()
+        private bool Authenticate() =>
+            !string.IsNullOrWhiteSpace(NameTxt.Text) &&
+            !string.IsNullOrWhiteSpace(SurnameTxt.Text) &&
+            !string.IsNullOrWhiteSpace(NumTxt.Text) &&
+            !string.IsNullOrWhiteSpace(EmailTxt.Text) &&
+            !string.IsNullOrWhiteSpace(PassTxt.Text);
+
+        private Teacher CreateTeacherFromInput() => new Teacher
         {
-            if (string.IsNullOrWhiteSpace(NameTxt.Text) ||
-                string.IsNullOrWhiteSpace(SurnameTxt.Text) ||
-                string.IsNullOrWhiteSpace(NumTxt.Text) ||
-                string.IsNullOrWhiteSpace(EmailTxt.Text) ||
-                string.IsNullOrWhiteSpace(PassTxt.Text))
-            {
-                return false;
-            }
-            return true;
+            Name = NameTxt.Text,
+            Surname = SurnameTxt.Text,
+            Number = NumTxt.Text,
+            Email = EmailTxt.Text,
+            Password = PassTxt.Text
+        };
+
+        private async Task SaveTeacherToFirebase(Teacher teacher)
+        {
+            await firebaseClient
+                .Child("Teachers")
+                .PostAsync(teacher);
         }
+
+        private void ShowMessage(string message) =>
+            MessageBox.Show(message);
     }
 }
