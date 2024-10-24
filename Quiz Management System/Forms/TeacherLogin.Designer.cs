@@ -1,6 +1,6 @@
 ﻿namespace Quiz_Management_System
 {
-    partial class Form2
+    partial class TeacherLogin
     {
         /// <summary>
         /// Required designer variable.

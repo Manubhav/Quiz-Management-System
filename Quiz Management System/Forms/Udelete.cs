@@ -1,11 +1,6 @@
 ﻿using Firebase.Database;
 using Firebase.Database.Query;
-using System;
-using System.Collections;
-using System.Collections.Generic;
 using System.Data;
-using System.Linq;
-using System.Windows.Forms;
 using Quiz_Management_System.Models;
 
 namespace Quiz_Management_System
@@ -14,10 +9,11 @@ namespace Quiz_Management_System
     {
         private static FirebaseClient firebaseClient;
 
+        // Constructor for the Udelete user control
         public Udelete()
         {
-            InitializeComponent();
-            FirebaseInitializer.InitializeFirebase(); // Initialize Firebase
+            InitializeComponent(); // Initialize the user control components
+            FirebaseInitializer.InitializeFirebase(); // Initialize Firebase connection
             firebaseClient = new FirebaseClient("https://smart-learning-system-a2c86-default-rtdb.asia-southeast1.firebasedatabase.app");
         }
 
@@ -26,12 +22,14 @@ namespace Quiz_Management_System
         {
             try
             {
+                // Query Firebase for questions matching the Subject ID
                 var questions = await firebaseClient
                     .Child("Questions")
                     .OrderBy("Subject_id")
-                    .EqualTo(int.Parse(textBox1.Text))
+                    .EqualTo(int.Parse(textBox1.Text)) // Convert text to int for comparison
                     .OnceAsync<Question>();
 
+                // Create a DataTable to hold the results
                 DataTable dtb = new DataTable();
                 dtb.Columns.Add("Question_id");
                 dtb.Columns.Add("Subject");
@@ -42,6 +40,7 @@ namespace Quiz_Management_System
                 dtb.Columns.Add("Answer4");
                 dtb.Columns.Add("CorrectAnswer");
 
+                // Populate the DataTable with question data
                 foreach (var question in questions)
                 {
                     DataRow row = dtb.NewRow();
@@ -56,10 +55,12 @@ namespace Quiz_Management_System
                     dtb.Rows.Add(row);
                 }
 
+                // Bind the DataTable to the DataGridView
                 deleteDGV.DataSource = dtb;
             }
             catch (Exception ex)
             {
+                // Handle exceptions by showing an error message
                 MessageBox.Show("Error: " + ex.Message);
             }
         }
@@ -67,10 +68,12 @@ namespace Quiz_Management_System
         // Load all questions from Firebase
         private async void LoadData()
         {
+            // Query Firebase to get all questions
             var questions = await firebaseClient
                 .Child("Questions")
                 .OnceAsync<Question>();
 
+            // Create a DataTable to hold the results
             DataTable dtb = new DataTable();
             dtb.Columns.Add("Question_id");
             dtb.Columns.Add("Subject");
@@ -81,6 +84,7 @@ namespace Quiz_Management_System
             dtb.Columns.Add("Answer4");
             dtb.Columns.Add("CorrectAnswer");
 
+            // Populate the DataTable with question data
             foreach (var question in questions)
             {
                 DataRow row = dtb.NewRow();
@@ -95,17 +99,21 @@ namespace Quiz_Management_System
                 dtb.Rows.Add(row);
             }
 
+            // Bind the DataTable to the DataGridView
             deleteDGV.DataSource = dtb;
         }
 
-        // Load subjects into the ComboBox
+        // Load subjects into the ComboBox for filtering
         private async void ComboLoad()
         {
+            // Query Firebase to get all subjects
             var subjects = await firebaseClient
                 .Child("Subjects")
                 .OnceAsync<Subject>();
 
+            // Clear existing items in the ComboBox
             comboBox1.Items.Clear();
+            // Populate the ComboBox with subject names
             foreach (var subject in subjects)
             {
                 comboBox1.Items.Add(subject.Object.Name);
@@ -115,12 +123,14 @@ namespace Quiz_Management_System
         // Filter questions by subject selected in the ComboBox
         private async void FilterCombo()
         {
+            // Query Firebase for questions matching the selected subject
             var questions = await firebaseClient
                 .Child("Questions")
                 .OrderBy("Subject")
-                .StartAt(comboBox1.Text)
+                .StartAt(comboBox1.Text) // Start filtering from the selected subject
                 .OnceAsync<Question>();
 
+            // Create a DataTable to hold the results
             DataTable dtb = new DataTable();
             dtb.Columns.Add("Question_id");
             dtb.Columns.Add("Subject");
@@ -131,6 +141,7 @@ namespace Quiz_Management_System
             dtb.Columns.Add("Answer4");
             dtb.Columns.Add("CorrectAnswer");
 
+            // Populate the DataTable with question data
             foreach (var question in questions)
             {
                 DataRow row = dtb.NewRow();
@@ -145,6 +156,7 @@ namespace Quiz_Management_System
                 dtb.Rows.Add(row);
             }
 
+            // Bind the DataTable to the DataGridView
             deleteDGV.DataSource = dtb;
         }
 
@@ -157,20 +169,20 @@ namespace Quiz_Management_System
         // On load, fetch data and load ComboBox with subjects
         private void Udelete_Load(object sender, EventArgs e)
         {
-            LoadData();
-            ComboLoad();
+            LoadData(); // Load all questions when the control is loaded
+            ComboLoad(); // Load subjects into the ComboBox
         }
 
         // Refresh data when button3 is clicked
         private void button3_Click(object sender, EventArgs e)
         {
-            LoadData();
+            LoadData(); // Reload all questions
         }
 
         // Filter data when button4 is clicked
         private void button4_Click(object sender, EventArgs e)
         {
-            FilterCombo();
+            FilterCombo(); // Filter questions based on the selected subject
         }
 
         // Delete question by ID entered in textBox2
@@ -178,16 +190,18 @@ namespace Quiz_Management_System
         {
             try
             {
+                // Delete the question with the specified ID from Firebase
                 await firebaseClient
                     .Child("Questions")
                     .Child(textBox2.Text) // Assuming textBox2 contains the Question ID
                     .DeleteAsync();
 
-                MessageBox.Show("Deleted");
-                FilterCombo();
+                MessageBox.Show("Deleted"); // Show confirmation message
+                FilterCombo(); // Refresh the questions list after deletion
             }
             catch (Exception ex)
             {
+                // Handle exceptions by showing an error message
                 MessageBox.Show("Error: " + ex.Message);
             }
         }

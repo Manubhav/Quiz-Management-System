@@ -142,6 +142,16 @@ namespace Quiz_Management_System.Properties {
         }
         
         /// <summary>
+        ///   Looks up a localized resource of type System.Byte[].
+        /// </summary>
+        internal static byte[] smart_learning_system_a2c86_firebase_adminsdk_265q7_82bc2c0986 {
+            get {
+                object obj = ResourceManager.GetObject("smart_learning_system_a2c86_firebase_adminsdk_265q7_82bc2c0986", resourceCulture);
+                return ((byte[])(obj));
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized resource of type System.Drawing.Bitmap.
         /// </summary>
         internal static System.Drawing.Bitmap UTS_bg {

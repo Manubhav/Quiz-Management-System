@@ -151,4 +151,7 @@
   <data name="UTS_Logo" type="System.Resources.ResXFileRef, System.Windows.Forms">
     <value>..\Resources\UTS Logo.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
   </data>
+  <data name="smart_learning_system_a2c86_firebase_adminsdk_265q7_82bc2c0986" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>..\Resources\smart-learning-system-a2c86-firebase-adminsdk-265q7-82bc2c0986.json;System.Byte[], mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </data>
 </root>

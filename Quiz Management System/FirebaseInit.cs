@@ -1,5 +1,6 @@
 ﻿using FirebaseAdmin;
 using Google.Apis.Auth.OAuth2;
+using System.IO;
 
 public static class FirebaseInitializer
 {
@@ -9,9 +10,12 @@ public static class FirebaseInitializer
     {
         if (!firebaseInitialized)
         {
+            // The JSON file is located in a 'Resources' folder in your project
+            string jsonFilePath = Path.Combine(Directory.GetCurrentDirectory(), "Resources", "smart-learning-system-a2c86-firebase-adminsdk-265q7-82bc2c0986.json");
+
             FirebaseApp.Create(new AppOptions()
             {
-                Credential = GoogleCredential.FromFile("F:\\UTS\\Sem-IV\\.NET App Dev\\Quiz_Management_System-master\\Quiz Management System\\smart-learning-system-a2c86-firebase-adminsdk-265q7-82bc2c0986.json"),
+                Credential = GoogleCredential.FromFile(jsonFilePath), // Use relative path
             });
             firebaseInitialized = true; // Mark Firebase as initialized
         }
