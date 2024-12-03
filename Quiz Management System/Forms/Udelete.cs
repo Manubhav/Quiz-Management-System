@@ -2,6 +2,7 @@
 using Firebase.Database.Query;
 using System.Data;
 using Quiz_Management_System.Models;
+using System.Diagnostics;
 
 namespace Quiz_Management_System
 {
@@ -144,9 +145,10 @@ namespace Quiz_Management_System
             // Populate the DataTable with question data
             foreach (var question in questions)
             {
+                Debug.WriteLine(question);
                 DataRow row = dtb.NewRow();
                 row["Question_id"] = question.Object.Id;
-                row["Subject"] = question.Object.Subject;
+                row["Subject"] = question.Object.Subject_name;
                 row["Content"] = question.Object.Content;
                 row["Answer1"] = question.Object.Answer1;
                 row["Answer2"] = question.Object.Answer2;
@@ -190,14 +192,23 @@ namespace Quiz_Management_System
         {
             try
             {
-                // Delete the question with the specified ID from Firebase
-                await firebaseClient
-                    .Child("Questions")
-                    .Child(textBox2.Text) // Assuming textBox2 contains the Question ID
-                    .DeleteAsync();
+                if (textBox2.Text != null)
+                {
+                    Debug.WriteLine("\n"+textBox2.Text+"\n");
+                    // Delete the question with the specified ID from Firebase
+                    await firebaseClient
+                        .Child("Questions")
+                        .Child(textBox2.Text) // textBox2 contains the Question ID
+                        .DeleteAsync();
 
-                MessageBox.Show("Deleted"); // Show confirmation message
-                FilterCombo(); // Refresh the questions list after deletion
+                    MessageBox.Show("Deleted"); // Show confirmation message
+                    FilterCombo(); // Refresh the questions list after deletion
+                } 
+                else
+                {
+                    MessageBox.Show("No Question Selected");
+                }
+                
             }
             catch (Exception ex)
             {

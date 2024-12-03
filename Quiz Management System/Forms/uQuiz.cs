@@ -47,7 +47,7 @@ namespace Quiz_Management_System
             }
             catch (Exception ex)
             {
-                MessageBox.Show(ex.Message); // Show error message if loading fails
+                MessageBox.Show($"Error loading subjects: {ex.Message}"); // Show error message if loading fails
             }
         }
 

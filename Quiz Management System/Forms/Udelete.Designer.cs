@@ -102,7 +102,7 @@
             this.label3.Name = "label3";
             this.label3.Size = new System.Drawing.Size(66, 21);
             this.label3.TabIndex = 7;
-            this.label3.Text = "Question İD";
+            this.label3.Text = "Question ID";
             // 
             // textBox2
             // 

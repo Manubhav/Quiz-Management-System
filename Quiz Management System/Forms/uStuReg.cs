@@ -38,46 +38,53 @@ namespace Quiz_Management_System
             MessageBox.Show("Group registration successful!"); // Show success message
         }
 
-        // Asynchronously loads data into a DataGridView from Firebase
+        // Asynchronously loads data into a DataGridView from Firebase (Generic)
         private async Task LoadData<T>(string childName, DataGridView dgv, Func<T, Task<string[]>> rowMapper) where T : class
         {
-            var items = await firebaseClient.Child(childName).OnceAsync<T>(); // Fetch data from Firebase
-            var dt = new DataTable(); // Create a new DataTable
-
-            // Check if there are any items to load
-            if (!items.Any())
+            try
             {
-                dgv.DataSource = null; // Set DataSource to null if no items
-                return;
-            }
+                var items = await firebaseClient.Child(childName).OnceAsync<T>(); // Fetch data from Firebase
+                var dt = new DataTable(); // Create a new DataTable
 
-            // Use the first item to infer columns dynamically
-            var firstItem = items.FirstOrDefault()?.Object; // Get the first item
-            if (firstItem != null)
-            {
-                var sampleRow = await rowMapper(firstItem); // Map the first item to a row
-
-                // Generate columns based on the first row of data
-                foreach (var property in sampleRow)
+                // Check if there are any items to load
+                if (!items.Any())
                 {
-                    dt.Columns.Add(property); // Add columns for each property
+                    dgv.DataSource = null; // Set DataSource to null if no items
+                    return;
                 }
-            }
-            else
-            {
-                throw new InvalidOperationException("No data available to generate columns."); // Throw error if no data
-            }
 
-            // Add rows to the DataTable
-            foreach (var item in items)
-            {
-                if (item.Object != null)
+                // Use the first item to infer columns dynamically
+                var firstItem = items.FirstOrDefault()?.Object; // Get the first item
+                if (firstItem != null)
                 {
-                    dt.Rows.Add(await rowMapper(item.Object)); // Add mapped rows to DataTable
-                }
-            }
+                    var sampleRow = await rowMapper(firstItem); // Map the first item to a row
 
-            dgv.DataSource = dt; // Set DataSource of DataGridView to the populated DataTable
+                    // Generate columns based on the first row of data
+                    foreach (var property in sampleRow)
+                    {
+                        dt.Columns.Add(property); // Add columns for each property
+                    }
+                }
+                else
+                {
+                    throw new InvalidOperationException("No data available to generate columns."); // Throw error if no data
+                }
+
+                // Add rows to the DataTable
+                foreach (var item in items)
+                {
+                    if (item.Object != null)
+                    {
+                        dt.Rows.Add(await rowMapper(item.Object)); // Add mapped rows to DataTable
+                    }
+                }
+
+                dgv.DataSource = dt; // Set DataSource of DataGridView to the populated DataTable
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show($"Error loading data for {childName}: {ex.Message}");
+            }
         }
 
         // Event handler for loading groups into the DataGridView when button2 is clicked
